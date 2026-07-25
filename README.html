@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Lumina 产品说明与技术概览">
+  <title>Lumina · 产品说明</title>
+  <style>
+    :root{color-scheme:light;--ink:#172033;--muted:#647089;--line:#dce3ee;--paper:#f7f9fc;--card:#fff;--accent:#4f46e5;--accent-2:#0ea5a4;--shadow:0 18px 45px rgba(31,41,71,.08)}
+    *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+    a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}.wrap{max-width:1180px;margin:auto;padding:0 24px}
+    .hero{padding:72px 0 58px;background:linear-gradient(135deg,#eef2ff 0%,#f8fafc 55%,#ecfeff 100%);border-bottom:1px solid var(--line)}
+    .eyebrow{color:var(--accent);font-size:13px;font-weight:750;letter-spacing:.13em;text-transform:uppercase}.hero h1{margin:10px 0 12px;font-size:clamp(38px,6vw,70px);line-height:1.05;letter-spacing:-.04em}.hero p{max-width:760px;margin:0;color:#46536a;font-size:20px}.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}.pill{padding:6px 12px;border:1px solid #cbd5e1;border-radius:999px;background:rgba(255,255,255,.75);color:#46536a;font-size:13px}
+    main{padding:42px 0 80px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}.card{grid-column:span 4;padding:24px;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.card.wide{grid-column:span 8}.card.full{grid-column:1/-1}.card h2,.card h3{margin:0 0 12px;line-height:1.25}.card h2{font-size:24px}.card h3{font-size:18px}.card p{margin:8px 0;color:var(--muted)}.card ul{margin:10px 0 0;padding-left:20px}.card li+li{margin-top:6px}
+    .section{margin-top:28px}.section-title{display:flex;align-items:baseline;gap:12px;margin:0 0 14px;font-size:27px}.section-title small{color:var(--muted);font-size:13px;font-weight:500}
+    table{width:100%;border-collapse:collapse;margin-top:10px}th,td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#41506a;font-size:13px}td{color:#4f5c73}code{padding:2px 6px;border-radius:6px;background:#eef2ff;color:#3730a3;font-size:.9em}pre{overflow:auto;padding:16px;border-radius:12px;background:#111827;color:#e5e7eb;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
+    .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}.step{padding:16px;border:1px solid var(--line);border-radius:14px;background:#fbfdff}.step b{display:block;margin-bottom:5px;color:var(--accent)}.note{padding:16px 18px;border-left:4px solid var(--accent-2);background:#ecfeff;color:#315568;border-radius:10px}
+    footer{padding:28px 0 50px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+    @media(max-width:820px){.card,.card.wide{grid-column:1/-1}.flow{grid-template-columns:1fr 1fr}.hero{padding-top:48px}}@media(max-width:520px){.flow{grid-template-columns:1fr}.wrap{padding:0 16px}}
+  </style>
+</head>
+<body>
+  <header class="hero"><div class="wrap">
+    <div class="eyebrow">Product brief · Technical overview</div>
+    <h1>Lumina</h1>
+    <p>一个本地优先的个人摄影档案系统：让照片、地点、时间和作品集形成可浏览、可管理、可备份的个人记忆空间。</p>
+    <div class="meta"><span class="pill">Next.js 16</span><span class="pill">React 19</span><span class="pill">SQLite + Drizzle</span><span class="pill">Windows / macOS / Linux</span></div>
+  </div></header>
+  <main class="wrap">
+    <section class="section"><h2 class="section-title">01 · 产品定义 <small>What and why</small></h2><div class="grid">
+      <article class="card wide"><h3>产品定位</h3><p>Lumina 面向希望长期保存和整理个人摄影作品的用户。它把公开展示体验与私有管理能力放在同一个本地应用中，不依赖托管数据库或外部媒体服务。</p><p>核心原则是<strong>本地优先、数据可控、展示有叙事、功能可验证</strong>。</p></article>
+      <article class="card"><h3>用户角色</h3><ul><li><strong>访客：</strong>浏览首页、图集、作品、时间线和地图。</li><li><strong>拥有者：</strong>在 Studio 中登录，维护照片、图集、地点和站点设置。</li></ul></article>
+      <article class="card"><h3>产品目标</h3><ul><li>降低个人照片整理和回看的成本。</li><li>用地点、时间和作品集建立多维入口。</li><li>让原始数据和备份始终掌握在用户手中。</li></ul></article>
+    </div></section>
+
+    <section class="section"><h2 class="section-title">02 · 信息架构 <small>Experience map</small></h2><div class="grid">
+      <article class="card full"><table><thead><tr><th>区域</th><th>路由</th><th>职责</th><th>关键体验</th></tr></thead><tbody>
+        <tr><td>公开展示</td><td><code>/</code></td><td>站点首页与照片墙</td><td>瀑布流、背景模式、动效导航、照片大图</td></tr>
+        <tr><td>作品与图集</td><td><code>/archive</code> <code>/works</code></td><td>按作品集浏览内容</td><td>分类筛选、图集封面、作品详情</td></tr>
+        <tr><td>时间与地点</td><td><code>/timeline</code> <code>/map</code></td><td>以时间和地理关系探索档案</td><td>全球、亚洲、中国及区域地图层级</td></tr>
+        <tr><td>管理后台</td><td><code>/studio</code></td><td>登录后管理照片库</td><td>导入、编辑、图集维护、操作与设置</td></tr>
+      </tbody></table></article>
+      <article class="card full"><div class="flow"><div class="step"><b>导入</b>读取媒体与 EXIF 信息</div><div class="step"><b>整理</b>生成作品、图集和地点关系</div><div class="step"><b>探索</b>从首页、时间线或地图进入内容</div><div class="step"><b>保护</b>执行本地备份并保留清单</div></div></article>
+    </div></section>
+
+    <section class="section"><h2 class="section-title">03 · 前端特点 <small>Frontend experience</small></h2><div class="grid">
+      <article class="card"><h3>叙事化展示</h3><p>使用 Next.js App Router 组织公开页面，配合照片墙、背景上下文、分段显现和照片弹窗，让档案更接近一个可漫游的作品空间。</p></article>
+      <article class="card"><h3>地图探索</h3><p>提供全球、亚洲、中国、省份、国家和区域层级的地图入口；地图颜色、显示模式和主题可在前端交互中切换。</p></article>
+      <article class="card"><h3>组件化与响应式</h3><p>业务组件位于 <code>frontend/modules</code>，通用 UI 位于 <code>frontend/components/ui</code>；布局和交互面向桌面与移动端适配。</p></article>
+      <article class="card wide"><h3>技术栈</h3><p>Next.js 16、React 19、Tailwind CSS v4、Motion、Lucide，以及地图相关的 d3-geo、TopoJSON 和 world-atlas。公开页和 Studio 共享站点配置、导航和媒体 URL 适配层。</p></article>
+      <article class="card"><h3>可访问的入口</h3><p>公开区域无需登录；管理区域通过独立登录页和受保护布局隔离，减少管理功能对访客体验的干扰。</p></article>
+    </div></section>
+
+    <section class="section"><h2 class="section-title">04 · 后端特点 <small>Backend capability</small></h2><div class="grid">
+      <article class="card"><h3>数据层</h3><p>使用 better-sqlite3 与 Drizzle ORM 保存库、图集、媒体、地点和操作相关数据；迁移文件位于 <code>backend/drizzle</code>。</p></article>
+      <article class="card"><h3>媒体处理</h3><p>支持常见照片格式和 RAW 处理链路，使用 exifr、ExifTool 和 Sharp 提取元数据、生成预览并管理媒体变体。</p></article>
+      <article class="card"><h3>领域模块</h3><p>Library、Media、Map、Studio 和 Operations 分域组织。API 路由只负责协议适配，业务逻辑集中在 <code>backend/modules</code>。</p></article>
+      <article class="card"><h3>安全与校验</h3><p>Studio 使用密码和会话 Cookie 保护；输入校验、来源检查、媒体路径和操作参数由后端统一处理。</p></article>
+      <article class="card wide"><h3>备份与可恢复性</h3><p>Operations 模块把 SQLite 数据库和清单写入本地备份目录，便于在不依赖云服务的情况下保留可追踪的恢复点。</p></article>
+    </div></section>
+
+    <section class="section"><h2 class="section-title">05 · 数据与边界 <small>Trust model</small></h2><div class="grid">
+      <article class="card wide"><h3>默认存储</h3><p>未配置路径时使用项目目录下的 <code>.local-data/</code> 和 <code>.local-backups/</code>。可通过 <code>PHOTO_ARCHIVE_DATA_DIR</code> 和 <code>PHOTO_ARCHIVE_BACKUP_DIR</code> 指向独立磁盘或用户指定目录。</p><div class="note">真实照片、SQLite 数据库、备份、密码和密钥不应提交到 Git。发布包只包含应用代码、公共资源和示例配置。</div></article>
+      <article class="card"><h3>运行配置</h3><pre>ADMIN_PASSWORD=your-password
+AUTH_COOKIE_SECRET=random-secret
+NEXT_PUBLIC_SITE_NAME=Lumina</pre></article>
+    </div></section>
+
+    <section class="section"><h2 class="section-title">06 · 工程质量 <small>Quality gate</small></h2><div class="grid">
+      <article class="card"><h3>验证命令</h3><pre>pnpm lint
+pnpm typecheck
+pnpm test:run
+pnpm test:e2e
+pnpm build</pre></article>
+      <article class="card wide"><h3>测试分层</h3><ul><li>后端仓储、媒体、备份、输入校验和地点推断测试。</li><li>前端地图颜色、地图网格、公开体验和交互逻辑测试。</li><li>Playwright 覆盖地图、Studio 和关键浏览流程。</li></ul></article>
+    </div></section>
+
+    <section class="section"><h2 class="section-title">07 · 本地运行与发布 <small>Operating model</small></h2><div class="grid">
+      <article class="card wide"><h3>快速开始</h3><pre>pnpm install
+cp frontend/.env.example frontend/.env.local
+pnpm dev
+# http://localhost:3002</pre><p>Windows PowerShell 可使用 <code>Copy-Item frontend/.env.example frontend/.env.local</code>。</p></article>
+      <article class="card"><h3>发布边界</h3><p>开发区可以包含协作文档、测试产物和本地数据；发布包应只保留应用源码、公共资源和示例配置。</p></article>
+    </div></section>
+  </main>
+  <footer><div class="wrap">Lumina · 本地优先的个人摄影档案系统 · 当前未声明开源许可证</div></footer>
+</body>
+</html>

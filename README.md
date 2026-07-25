@@ -2,6 +2,8 @@
 
 [简体中文](README.zh-CN.md)
 
+[产品说明（HTML）](README.html)
+
 Lumina is a local-first personal photography archive. It combines a public-facing gallery with a password-protected studio for organizing collections, locations, timelines, and map views.
 
 Your library stays on the machine running Lumina. The application stores metadata in SQLite and keeps imported media in a configurable local data directory.
