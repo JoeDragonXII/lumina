@@ -1,0 +1,74 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/frontend/.next/
+/frontend/.next-e2e/
+/frontend/.next-build-check/
+/frontend/public/photos/
+/frontend/.next*/
+/out/
+
+# production
+/dist
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+!/frontend/.env.example
+
+# local app data
+data/*.private.json
+data/*.backup-*
+/.local-data/
+/.local-backups/
+/.test-data/
+
+# test output
+/coverage/
+/playwright-report/
+/test-results/
+
+# codebuddy
+/.codebuddy/
+
+# collaboration docs (not part of the deliverable)
+/docs/
+/collab/
+
+# nested clean release repository
+/lumina-release/
+
+# archived generated/source assets not used by the app
+/archive/
+/awesome-design-md/
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
