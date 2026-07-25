@@ -6,17 +6,17 @@
   <meta name="description" content="Lumina 产品说明与技术概览">
   <title>Lumina · 产品说明</title>
   <style>
-    :root{color-scheme:light;--ink:#172033;--muted:#647089;--line:#dce3ee;--paper:#f7f9fc;--card:#fff;--accent:#4f46e5;--accent-2:#0ea5a4;--shadow:0 18px 45px rgba(31,41,71,.08)}
+    :root{color-scheme:light;--ink:#172033;--muted:#647089;--line:#dce3ee;--paper:#f7f9fc;--card:#fff;--accent:#FE6CB7;--accent-soft:#FFD9D1;--land:#00489D;--day-accent:#97FE98;--day-focus:#FFF2DF;--day-land:#363531;--accent-2:#0ea5a4;--shadow:0 18px 45px rgba(31,41,71,.08)}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.7 system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
     a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}.wrap{max-width:1180px;margin:auto;padding:0 24px}
-    .hero{padding:72px 0 58px;background:linear-gradient(135deg,#eef2ff 0%,#f8fafc 55%,#ecfeff 100%);border-bottom:1px solid var(--line)}
-    .eyebrow{color:var(--accent);font-size:13px;font-weight:750;letter-spacing:.13em;text-transform:uppercase}.hero h1{margin:10px 0 12px;font-size:clamp(38px,6vw,70px);line-height:1.05;letter-spacing:-.04em}.hero p{max-width:760px;margin:0;color:#46536a;font-size:20px}.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}.pill{padding:6px 12px;border:1px solid #cbd5e1;border-radius:999px;background:rgba(255,255,255,.75);color:#46536a;font-size:13px}
+    .hero{padding:72px 0 58px;background:radial-gradient(circle at 15% 25%,rgba(254,108,183,.24),transparent 32%),linear-gradient(135deg,#050813 0%,#12082d 55%,#00489D 150%);border-bottom:1px solid #252047;color:#fff}
+    .eyebrow{color:var(--accent);font-size:13px;font-weight:750;letter-spacing:.13em;text-transform:uppercase}.hero h1{margin:10px 0 12px;font-size:clamp(38px,6vw,70px);line-height:1.05;letter-spacing:-.04em}.hero p{max-width:760px;margin:0;color:#FFD9D1;font-size:20px}.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}.pill{padding:6px 12px;border:1px solid rgba(254,108,183,.5);border-radius:999px;background:rgba(5,8,19,.52);color:#fff;font-size:13px}
     main{padding:42px 0 80px}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:20px}.card{grid-column:span 4;padding:24px;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.card.wide{grid-column:span 8}.card.full{grid-column:1/-1}.card h2,.card h3{margin:0 0 12px;line-height:1.25}.card h2{font-size:24px}.card h3{font-size:18px}.card p{margin:8px 0;color:var(--muted)}.card ul{margin:10px 0 0;padding-left:20px}.card li+li{margin-top:6px}
-    .section{margin-top:28px}.section-title{display:flex;align-items:baseline;gap:12px;margin:0 0 14px;font-size:27px}.section-title small{color:var(--muted);font-size:13px;font-weight:500}
-    table{width:100%;border-collapse:collapse;margin-top:10px}th,td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#41506a;font-size:13px}td{color:#4f5c73}code{padding:2px 6px;border-radius:6px;background:#eef2ff;color:#3730a3;font-size:.9em}pre{overflow:auto;padding:16px;border-radius:12px;background:#111827;color:#e5e7eb;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
-    .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}.step{padding:16px;border:1px solid var(--line);border-radius:14px;background:#fbfdff}.step b{display:block;margin-bottom:5px;color:var(--accent)}.note{padding:16px 18px;border-left:4px solid var(--accent-2);background:#ecfeff;color:#315568;border-radius:10px}
+    .section{margin-top:28px}.section-title{display:flex;align-items:baseline;gap:12px;margin:0 0 14px;font-size:27px}.section-title small{color:var(--land);font-size:13px;font-weight:650}
+    table{width:100%;border-collapse:collapse;margin-top:10px}th,td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#41506a;font-size:13px}td{color:#4f5c73}code{padding:2px 6px;border-radius:6px;background:#eef2ff;color:var(--land);font-size:.9em}pre{overflow:auto;padding:16px;border-radius:12px;background:#111827;color:#e5e7eb;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
+    .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}.step{padding:16px;border:1px solid var(--line);border-radius:14px;background:#fbfdff}.step b{display:block;margin-bottom:5px;color:var(--accent)}.note{padding:16px 18px;border-left:4px solid var(--accent);background:#fff1f7;color:#315568;border-radius:10px}.shots{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.shot{margin:0;padding:10px;background:#050813;border:1px solid #25315c;border-radius:16px;box-shadow:0 12px 32px rgba(0,72,157,.16)}.shot img{display:block;width:100%;height:auto;border-radius:10px}.shot figcaption{padding:10px 4px 2px;color:#FFD9D1;font-size:13px}.palette{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}.swatch{display:flex;align-items:center;gap:8px;color:#536078;font-size:13px}.swatch i{display:inline-block;width:28px;height:28px;border-radius:8px;border:1px solid rgba(23,32,51,.14)}
     footer{padding:28px 0 50px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
-    @media(max-width:820px){.card,.card.wide{grid-column:1/-1}.flow{grid-template-columns:1fr 1fr}.hero{padding-top:48px}}@media(max-width:520px){.flow{grid-template-columns:1fr}.wrap{padding:0 16px}}
+    @media(max-width:820px){.card,.card.wide{grid-column:1/-1}.flow,.shots{grid-template-columns:1fr 1fr}.hero{padding-top:48px}}@media(max-width:520px){.flow,.shots{grid-template-columns:1fr}.wrap{padding:0 16px}}
   </style>
 </head>
 <body>
@@ -51,7 +51,12 @@
       <article class="card"><h3>可访问的入口</h3><p>公开区域无需登录；管理区域通过独立登录页和受保护布局隔离，减少管理功能对访客体验的干扰。</p></article>
     </div></section>
 
-    <section class="section"><h2 class="section-title">04 · 后端特点 <small>Backend capability</small></h2><div class="grid">
+    <section class="section"><h2 class="section-title">04 · 地图视觉 <small>Map color system</small></h2><div class="grid">
+      <article class="card full"><h3>同一套地图配色贯穿产品说明</h3><p>地图主题定义了两组可切换的视觉语言：夜间使用蓝色地图底色、粉色足迹和奶油色焦点；日间使用石墨底色、荧光绿足迹和暖白焦点。HTML 说明页沿用同样的夜间蓝紫背景和粉色强调色。</p><div class="palette"><span class="swatch"><i style="background:#FE6CB7"></i>夜间足迹&nbsp;#FE6CB7</span><span class="swatch"><i style="background:#FFD9D1"></i>夜间焦点&nbsp;#FFD9D1</span><span class="swatch"><i style="background:#00489D"></i>夜间基底&nbsp;#00489D</span><span class="swatch"><i style="background:#97FE98"></i>日间足迹&nbsp;#97FE98</span><span class="swatch"><i style="background:#FFF2DF"></i>日间焦点&nbsp;#FFF2DF</span><span class="swatch"><i style="background:#363531"></i>日间基底&nbsp;#363531</span></div></article>
+      <article class="card full"><div class="shots"><figure class="shot"><img src="README-assets/map-night.png" alt="Lumina 夜间地图界面，展示地图网格、地图控件和配色面板"><figcaption>夜间主题：蓝色地图基底、粉色足迹、奶油色焦点。</figcaption></figure><figure class="shot"><img src="README-assets/map-day.png" alt="Lumina 日间地图界面，展示地图网格、地图控件和配色面板"><figcaption>日间主题：石墨地图基底、荧光绿足迹、暖白焦点。</figcaption></figure></div></article>
+    </div></section>
+
+    <section class="section"><h2 class="section-title">05 · 后端特点 <small>Backend capability</small></h2><div class="grid">
       <article class="card"><h3>数据层</h3><p>使用 better-sqlite3 与 Drizzle ORM 保存库、图集、媒体、地点和操作相关数据；迁移文件位于 <code>backend/drizzle</code>。</p></article>
       <article class="card"><h3>媒体处理</h3><p>支持常见照片格式和 RAW 处理链路，使用 exifr、ExifTool 和 Sharp 提取元数据、生成预览并管理媒体变体。</p></article>
       <article class="card"><h3>领域模块</h3><p>Library、Media、Map、Studio 和 Operations 分域组织。API 路由只负责协议适配，业务逻辑集中在 <code>backend/modules</code>。</p></article>
@@ -59,14 +64,14 @@
       <article class="card wide"><h3>备份与可恢复性</h3><p>Operations 模块把 SQLite 数据库和清单写入本地备份目录，便于在不依赖云服务的情况下保留可追踪的恢复点。</p></article>
     </div></section>
 
-    <section class="section"><h2 class="section-title">05 · 数据与边界 <small>Trust model</small></h2><div class="grid">
+    <section class="section"><h2 class="section-title">06 · 数据与边界 <small>Trust model</small></h2><div class="grid">
       <article class="card wide"><h3>默认存储</h3><p>未配置路径时使用项目目录下的 <code>.local-data/</code> 和 <code>.local-backups/</code>。可通过 <code>PHOTO_ARCHIVE_DATA_DIR</code> 和 <code>PHOTO_ARCHIVE_BACKUP_DIR</code> 指向独立磁盘或用户指定目录。</p><div class="note">真实照片、SQLite 数据库、备份、密码和密钥不应提交到 Git。发布包只包含应用代码、公共资源和示例配置。</div></article>
       <article class="card"><h3>运行配置</h3><pre>ADMIN_PASSWORD=your-password
 AUTH_COOKIE_SECRET=random-secret
 NEXT_PUBLIC_SITE_NAME=Lumina</pre></article>
     </div></section>
 
-    <section class="section"><h2 class="section-title">06 · 工程质量 <small>Quality gate</small></h2><div class="grid">
+    <section class="section"><h2 class="section-title">07 · 工程质量 <small>Quality gate</small></h2><div class="grid">
       <article class="card"><h3>验证命令</h3><pre>pnpm lint
 pnpm typecheck
 pnpm test:run
@@ -75,7 +80,7 @@ pnpm build</pre></article>
       <article class="card wide"><h3>测试分层</h3><ul><li>后端仓储、媒体、备份、输入校验和地点推断测试。</li><li>前端地图颜色、地图网格、公开体验和交互逻辑测试。</li><li>Playwright 覆盖地图、Studio 和关键浏览流程。</li></ul></article>
     </div></section>
 
-    <section class="section"><h2 class="section-title">07 · 本地运行与发布 <small>Operating model</small></h2><div class="grid">
+    <section class="section"><h2 class="section-title">08 · 本地运行与发布 <small>Operating model</small></h2><div class="grid">
       <article class="card wide"><h3>快速开始</h3><pre>pnpm install
 cp frontend/.env.example frontend/.env.local
 pnpm dev
