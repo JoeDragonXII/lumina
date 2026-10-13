@@ -28,13 +28,13 @@ export default function ChinaArchiveMap({ counts, markers }: Readonly<{ counts: 
         const provinceName = province?.name || provinceId;
         const selected = selection?.kind === "province" && selection.id === provinceId;
         const label = `${provinceName}${count ? ` · ${count} 个图集` : ""}`;
-        return <path aria-label={`${provinceName}${count ? `，${count} 个图集` : ""}`} aria-pressed={selected} className="map-path archive-country-path" d={path(item as never) || ""} fill={selected ? "#cf665a" : count ? "#63bfa5" : "#14241f"} key={provinceId} onClick={() => setSelection({ kind: "province", id: provinceId })} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelection({ kind: "province", id: provinceId }); } }} role="button" stroke="#63756d" strokeWidth={1} tabIndex={0}><title>{label}</title></path>;
+        return <path aria-label={`${provinceName}${count ? `，${count} 个图集` : ""}`} aria-pressed={selected} className="map-path archive-country-path" d={path(item as never) || ""} fill={selected ? "var(--ui-accent)" : count ? "var(--ui-sage)" : "var(--ui-surface-raised)"} key={provinceId} onClick={() => setSelection({ kind: "province", id: provinceId })} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelection({ kind: "province", id: provinceId }); } }} role="button" stroke="var(--ui-line)" strokeWidth={1} tabIndex={0}><title>{label}</title></path>;
       })}
       {markers.map((marker) => {
         const point = projection([marker.longitude, marker.latitude]);
         if (!point) return null;
         const selected = selection?.kind === "marker" && selection.marker.id === marker.id;
-        return <g aria-label={`选择图集 ${marker.title}`} className="archive-map-marker" key={marker.id} onClick={() => setSelection({ kind: "marker", marker })} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelection({ kind: "marker", marker }); } }} role="button" tabIndex={0} transform={`translate(${point[0].toFixed(3)} ${point[1].toFixed(3)})`}><circle fill={selected ? "#cf665a" : "#f2f7f4"} r={selected ? 10 : 7} stroke="#07110f" strokeWidth="2" /><circle fill="#07110f" r="2.5" /><title>{marker.title}</title></g>;
+        return <g aria-label={`选择图集 ${marker.title}`} className="archive-map-marker" key={marker.id} onClick={() => setSelection({ kind: "marker", marker })} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelection({ kind: "marker", marker }); } }} role="button" tabIndex={0} transform={`translate(${point[0].toFixed(3)} ${point[1].toFixed(3)})`}><circle fill={selected ? "var(--ui-accent)" : "var(--ui-ink)"} r={selected ? 10 : 7} stroke="var(--ui-bg)" strokeWidth="2" /><circle fill="var(--ui-bg)" r="2.5" /><title>{marker.title}</title></g>;
       })}
     </svg>
     <aside aria-live="polite" className={`map-info-drawer ${selection ? "is-open" : ""}`}>

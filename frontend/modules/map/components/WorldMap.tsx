@@ -8,14 +8,13 @@ import {
   useState,
 } from "react";
 import { AnimatePresence, m } from "motion/react";
-import { X, ZoomIn, ZoomOut, ArrowRight, MapPin } from "lucide-react";
+import { X, ZoomIn, ZoomOut, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { feature as topojsonFeature } from "topojson-client";
 import type { Feature, Geometry } from "geojson";
 
 import { worldCountryByCode } from "@backend/modules/map/data/worldCountries";
 import { countryToRegion } from "@/modules/map/data/globalRegions";
-import { publicMotion } from "@/modules/public/motion";
 
 /* ── Types ── */
 
@@ -230,7 +229,7 @@ export default function WorldMap({ counts, markers, regionFilter }: Readonly<Wor
   /* ── Country <path> elements (recomputed only on zoom / geoData change) ── */
 
   const countryPaths = useMemo(() => {
-    return Array.from(pathCache.entries()).map(([key, { d, numericId, idx }]) => {
+    return Array.from(pathCache.entries()).map(([key, { d, numericId }]) => {
       const isVisited = visitedCodes.has(numericId);
       const isDimmed =
         regionFilter != null &&
@@ -442,8 +441,6 @@ export default function WorldMap({ counts, markers, regionFilter }: Readonly<Wor
 
   const worldPx = WORLD_PX_ZOOM1 * zoom;
   const globeD = GLOBE_R * 2 * zoom;
-  const globeCx = CX;
-  const globeCy = CY;
 
   return (
     <div className="archive-map-shell" style={{ position: "relative" }}>

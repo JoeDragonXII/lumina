@@ -90,8 +90,8 @@ export default function CountryMapView({
             slug: col.slug,
             title: col.title,
             city: loc.city || loc.regionName || col.slug,
-            px,
-            py,
+            px: Math.round(px * 1000) / 1000,
+            py: Math.round(py * 1000) / 1000,
           });
         }
       }

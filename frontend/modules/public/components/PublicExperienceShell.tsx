@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, domAnimation, LazyMotion, m, MotionConfig, useScroll, useSpring } from "motion/react";
 import { publicMotion } from "@/modules/public/motion";
 import { BackgroundProvider } from "./BackgroundContext";
+import HomeDockNav from "./HomeDockNav";
+import PageAppearanceControl from "./PageAppearanceControl";
 
 function subscribeReducedMotion(onChange: () => void) {
   const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -22,6 +24,7 @@ function reducedMotionServerSnapshot() {
 
 export default function PublicExperienceShell({ children }: Readonly<{ children: React.ReactNode }>) {
   const pathname = usePathname();
+  const isPreview = pathname.startsWith("/preview/");
   const reducedMotion = useSyncExternalStore(subscribeReducedMotion, reducedMotionSnapshot, reducedMotionServerSnapshot);
   const { scrollYProgress } = useScroll();
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 110, damping: 28, mass: 0.24 });
@@ -36,6 +39,7 @@ export default function PublicExperienceShell({ children }: Readonly<{ children:
               <m.div
                 animate={{ opacity: 1, y: 0 }}
                 className="public-route-frame"
+                data-dock-content={pathname.startsWith("/works") || pathname === "/timeline" || pathname === "/archive" ? "true" : undefined}
                 exit={{ opacity: 0, y: -8 }}
                 initial={{ opacity: 0, y: 12 }}
                 key={pathname}
@@ -44,6 +48,8 @@ export default function PublicExperienceShell({ children }: Readonly<{ children:
                 {children}
               </m.div>
             </AnimatePresence>
+            {(!isPreview || pathname === "/preview/map-legacy") && <HomeDockNav />}
+            {(pathname === "/" || pathname === "/archive") && <PageAppearanceControl />}
           </div>
         </LazyMotion>
       </MotionConfig>

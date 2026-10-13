@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import {
   geoCentroid,
@@ -57,8 +64,27 @@ const GRID_TILE_SIZE = 6.7;
 const GRID_TILE_RADIUS = 1.4;
 const GRID_SAMPLE_AXIS = 7;
 
+export const MAP_GRID_GEOMETRY = {
+  cellSize: GRID_SIZE,
+  tileRadius: GRID_TILE_RADIUS,
+  tileSize: GRID_TILE_SIZE,
+} as const;
+
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
+
+export interface MapOverlayRenderContext {
+  camera: {
+    zoom: number;
+    x: number;
+    y: number;
+  };
+  project: (coordinates: [number, number]) => [number, number] | null;
+  viewport: {
+    width: number;
+    height: number;
+  };
+}
 
 const regionCodeSet = new Map<string, Set<string>>();
 for (const region of GLOBAL_REGIONS) {
@@ -87,19 +113,25 @@ for (const worldFeature of allFeatures) {
 }
 
 export default function SimpleWorldMap({
+  allowCountryNavigation = true,
   colors,
   counts,
   continent,
   isDark,
   mode,
+  renderOverlay,
   renderStyle,
+  showMarkers = true,
 }: {
+  allowCountryNavigation?: boolean;
   colors: MapPaletteColors;
   counts: Record<string, number>;
   continent?: string;
   isDark: boolean;
   mode: "flat" | "globe";
+  renderOverlay?: (context: MapOverlayRenderContext) => ReactNode;
   renderStyle: "grid" | "classic";
+  showMarkers?: boolean;
 }) {
   const initialGlobeCenter = globeCenters[continent ?? "all"] ?? globeCenters.all;
   const router = useRouter();
@@ -331,7 +363,11 @@ export default function SimpleWorldMap({
       const path = pathGenerator(worldFeature);
       return path ? [{ code, path }] : [];
     });
-    const ownershipCanvas = document.createElement("canvas");
+    const ownershipCanvas = (() => {
+      if (typeof document === "undefined") return null;
+      return document.createElement("canvas");
+    })();
+    if (!ownershipCanvas) return [];
     ownershipCanvas.width = viewport.width;
     ownershipCanvas.height = viewport.height;
     const ownershipContext = ownershipCanvas.getContext("2d", {
@@ -454,26 +490,39 @@ export default function SimpleWorldMap({
               setHoveredCode((current) => (current === code ? null : current))
             }
             onClick={() => {
-              if (suppressClickRef.current || !isSelectedRegion) return;
+              if (
+                suppressClickRef.current ||
+                !allowCountryNavigation ||
+                !isSelectedRegion
+              ) {
+                return;
+              }
               router.push(`/map/${regionKey}/${code.toLowerCase()}`);
             }}
             onKeyDown={(event) => {
-              if (!isSelectedRegion) return;
+              if (!allowCountryNavigation || !isSelectedRegion) return;
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
                 router.push(`/map/${regionKey}/${code.toLowerCase()}`);
               }
             }}
             role="button"
-            tabIndex={isSelectedRegion ? 0 : -1}
-            aria-hidden={!isSelectedRegion}
+            tabIndex={allowCountryNavigation && isSelectedRegion ? 0 : -1}
+            aria-hidden={!allowCountryNavigation || !isSelectedRegion}
             aria-label={`${country?.name ?? code}${hasData ? `，${count} 个图集` : ""}`}
           >
             <title>{`${country?.name ?? code}${hasData ? ` · ${count} 个图集` : ""}`}</title>
           </path>
         );
       }),
-    [activeCodes, counts, pathGenerator, router, visibleFeatures],
+    [
+      activeCodes,
+      allowCountryNavigation,
+      counts,
+      pathGenerator,
+      router,
+      visibleFeatures,
+    ],
   );
 
   const markerPoints = useMemo(() => {
@@ -526,6 +575,11 @@ export default function SimpleWorldMap({
   const cameraTranslateX = cameraCenterX + camera.x - camera.zoom * cameraCenterX;
   const cameraTranslateY = cameraCenterY + camera.y - camera.zoom * cameraCenterY;
   const mapTransform = `matrix(${camera.zoom} 0 0 ${camera.zoom} ${cameraTranslateX} ${cameraTranslateY})`;
+  const overlay = renderOverlay?.({
+    camera,
+    project: (coordinates) => projection(coordinates),
+    viewport,
+  });
   const sceneLabel =
     GLOBAL_REGIONS.find((region) => region.key === continent)?.label ?? "世界";
   const gridPalette = createMapRenderPalette(
@@ -591,7 +645,9 @@ export default function SimpleWorldMap({
       onPointerDown={(event) => {
         if (
           event.button !== 0 ||
-          (event.target as Element).closest(".map-zoom-controls")
+          (event.target as Element).closest(
+            ".map-zoom-controls, .map-preview-interactive",
+          )
         ) {
           return;
         }
@@ -700,23 +756,28 @@ export default function SimpleWorldMap({
               ) : (
                 <g className="map-country-layer">{countryPaths}</g>
               )}
-              {routePath ? <path className="map-route-arc" d={routePath} /> : null}
+              {showMarkers && routePath ? (
+                <path className="map-route-arc" d={routePath} />
+              ) : null}
 
-              <g className="map-marker-layer" aria-hidden="true">
-                {markerPoints.map((point, index) => (
-                  <g
-                    key={point.code}
-                    className={`map-location-marker ${index === 0 ? "is-primary" : ""}`}
-                    transform={`translate(${point.x} ${point.y})`}
-                  >
-                    <circle className="map-marker-halo" r="14" />
-                    <circle className="map-marker-core" r="4.5" />
-                  </g>
-                ))}
-              </g>
+              {showMarkers ? (
+                <g className="map-marker-layer" aria-hidden="true">
+                  {markerPoints.map((point, index) => (
+                    <g
+                      key={point.code}
+                      className={`map-location-marker ${index === 0 ? "is-primary" : ""}`}
+                      transform={`translate(${point.x} ${point.y})`}
+                    >
+                      <circle className="map-marker-halo" r="14" />
+                      <circle className="map-marker-core" r="4.5" />
+                    </g>
+                  ))}
+                </g>
+              ) : null}
               {mode === "flat" && renderStyle === "grid" ? (
                 <g className="map-country-hit-layer">{countryPaths}</g>
               ) : null}
+              {overlay}
             </g>
           </g>
           {spherePath ? <path className="map-globe-rim" d={spherePath} /> : null}

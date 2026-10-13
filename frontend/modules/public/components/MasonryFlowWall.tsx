@@ -3,26 +3,27 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import {
-  type MotionValue,
   m,
-  useMotionValue,
   useReducedMotion,
-  useSpring,
-  useTransform,
 } from "motion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import ParticleGlow from "./ParticleGlow";
+import { composePhotoWall, type WallBlock } from "@/modules/library/photoWallLayout";
 
 export type FlowPhoto = {
   id: string;
   src: string;
+  srcSet?: string;
+  sizes?: string;
   width: number;
   height: number;
   title?: string;
+  date?: string;
   href?: string;
 };
 
 const colorCache = new Map<string, string>();
+const subscribeHydration = () => () => {};
 
 function extractDominantColor(img: HTMLImageElement, cacheKey: string): string | null {
   const cached = colorCache.get(cacheKey);
@@ -70,48 +71,46 @@ function splitColumns(photos: FlowPhoto[], columns: number): FlowPhoto[][] {
 
 function FlowCard({
   photo,
-  mouseY,
   reduceMotion,
   origin,
   onClick,
 }: Readonly<{
   photo: FlowPhoto;
-  mouseY: MotionValue<number>;
   reduceMotion: boolean;
   origin: "left" | "right";
   onClick?: (photo: FlowPhoto) => void;
 }>) {
-  const [frame, setFrame] = useState<HTMLDivElement | null>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   const [hovered, setHovered] = useState(false);
   const [glow, setGlow] = useState<string | null>(colorCache.get(photo.src) ?? null);
-
-  const distance = useTransform(mouseY, (val) => {
-    const rect = frame?.getBoundingClientRect();
-    if (!rect) return val;
-    return val - rect.top - rect.height / 2;
-  });
-  const scaleSync = useTransform(distance, [-320, 0, 320], [0.98, 1.1, 0.98]);
-  const scale = useSpring(scaleSync, { mass: 0.12, stiffness: 170, damping: 14 });
 
   const inner = (
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        ref={imageRef}
+        decoding="async"
+        srcSet={photo.srcSet}
+        sizes={photo.sizes}
         alt={photo.title ?? "照片"}
         className="home-flow-card-image"
         crossOrigin="anonymous"
         height={photo.height}
         loading="lazy"
         onLoad={(event) => {
+          if (!hovered || reduceMotion) return;
           const color = extractDominantColor(event.currentTarget, photo.src);
           if (color) setGlow(color);
         }}
         src={photo.src}
         width={photo.width}
       />
-      {photo.title ? (
+      {photo.title || photo.date ? (
         <span className="home-flow-card-caption">
-          <strong>{photo.title}</strong>
+          <span className="home-flow-card-meta">
+            {photo.title ? <strong>{photo.title}</strong> : null}
+            {photo.date ? <time dateTime={photo.date}>{photo.date}</time> : null}
+          </span>
           <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
         </span>
       ) : null}
@@ -121,15 +120,21 @@ function FlowCard({
   const className = "home-flow-card";
   return (
     <m.div
-      ref={setFrame}
       className="home-flow-card-frame"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onHoverStart={() => {
+        setHovered(true);
+        if (!reduceMotion && imageRef.current?.complete && imageRef.current.naturalWidth) {
+          const color = extractDominantColor(imageRef.current, photo.src);
+          if (color) setGlow(color);
+        }
+      }}
+      onHoverEnd={() => setHovered(false)}
+      whileHover={reduceMotion ? undefined : { scale: 1.18 }}
+      transition={{ type: "spring", mass: 0.12, stiffness: 170, damping: 14 }}
       style={
         reduceMotion
           ? undefined
           : {
-              scale,
               transformOrigin: origin === "left" ? "left center" : "right center",
               ["--card-glow" as string]: glow ?? undefined,
             }
@@ -145,7 +150,7 @@ function FlowCard({
           {inner}
         </button>
       ) : photo.href ? (
-        <Link aria-label={photo.title ? `打开 ${photo.title}` : "打开照片"} className={className} href={photo.href}>
+        <Link prefetch={false} aria-label={photo.title ? `打开 ${photo.title}` : "打开照片"} className={className} href={photo.href}>
           {inner}
         </Link>
       ) : (
@@ -157,35 +162,48 @@ function FlowCard({
 }
 
 function FlowColumn({
-  photos,
-  mouseY,
+  blocks,
   reduceMotion,
   origin,
-  duration,
+  speed,
   onPhotoClick,
 }: Readonly<{
-  photos: FlowPhoto[];
-  mouseY: MotionValue<number>;
+  blocks: WallBlock<FlowPhoto>[];
   reduceMotion: boolean;
   origin: "left" | "right";
-  duration: string;
+  speed: number;
   onPhotoClick?: (photo: FlowPhoto) => void;
 }>) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [duration, setDuration] = useState(30);
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const measure = () => {
+      const gap = parseFloat(getComputedStyle(track).rowGap) || 0;
+      setDuration((track.getBoundingClientRect().height + gap) / 2 / speed);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(track);
+    measure();
+    return () => observer.disconnect();
+  }, [speed]);
   return (
     <div className="home-flow-column">
-      <div className="home-flow-track" style={{ animationDuration: duration }}>
+      <div ref={trackRef} className="home-flow-track" style={{ animationDuration: `${duration}s` }}>
         {[0, 1].map((copy) => (
           <div aria-hidden={copy === 1} className="home-flow-group" key={`copy-${copy}`}>
-            {photos.map((photo) => (
+            {blocks.map((block) => <div key={block.photos[0].id} className={`home-flow-block home-flow-block-${block.kind}`}>
+            {block.photos.map((photo) => (
               <FlowCard
                 key={`${copy}-${photo.id}`}
-                mouseY={mouseY}
                 onClick={onPhotoClick}
                 origin={origin}
                 photo={photo}
                 reduceMotion={reduceMotion}
               />
             ))}
+            </div>)}
           </div>
         ))}
       </div>
@@ -198,16 +216,15 @@ export default function MasonryFlowWall({
   columns = 2,
   className,
   onPhotoClick,
-}: Readonly<{ photos: FlowPhoto[]; columns?: number; className?: string; onPhotoClick?: (photo: FlowPhoto) => void }>) {
-  const reduceMotion = useReducedMotion() ?? false;
-  const mouseY = useMotionValue(Infinity);
+  layoutSeed,
+}: Readonly<{ photos: FlowPhoto[]; columns?: number; className?: string; onPhotoClick?: (photo: FlowPhoto) => void; layoutSeed?: number }>) {
+  const hydrated = useSyncExternalStore(subscribeHydration, () => true, () => false);
+  const prefersReducedMotion = useReducedMotion() ?? false;
+  const reduceMotion = hydrated && prefersReducedMotion;
 
-  const buckets = useMemo(() => splitColumns(photos, columns), [photos, columns]);
-  // 每列独立时长，按列照片数微调，速度错开更自然
-  const durations = useMemo(
-    () => buckets.map((bucket, i) => `${52 + i * 6 + bucket.length}s`),
-    [buckets],
-  );
+  const buckets = useMemo(() => layoutSeed === undefined
+    ? splitColumns(photos, columns).map(bucket => bucket.map(photo => ({ kind: "solo" as const, photos: [photo] })))
+    : composePhotoWall(photos, columns, layoutSeed), [photos, columns, layoutSeed]);
 
   if (photos.length === 0) {
     return (
@@ -219,20 +236,17 @@ export default function MasonryFlowWall({
 
   return (
     <div
-      className="home-flow-wall"
+      className={["home-flow-wall", layoutSeed !== undefined && "home-flow-wall-varied", className].filter(Boolean).join(" ")}
       aria-label="照片流"
-      onMouseMove={(event) => mouseY.set(event.clientY)}
-      onMouseLeave={() => mouseY.set(Infinity)}
       style={{ ["--hf-flow-columns" as string]: String(columns) }}
     >
       {buckets.map((bucket, i) => (
         <FlowColumn
           key={`col-${i}`}
-          duration={durations[i]}
-          mouseY={mouseY}
+          speed={24 + i * 4}
           onPhotoClick={onPhotoClick}
           origin={i === 0 ? "left" : "right"}
-          photos={bucket}
+          blocks={bucket}
           reduceMotion={reduceMotion}
         />
       ))}

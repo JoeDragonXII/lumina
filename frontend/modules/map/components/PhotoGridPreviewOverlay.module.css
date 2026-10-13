@@ -1,0 +1,50 @@
+.overlay {
+  pointer-events: none;
+}
+
+.photoFan {
+  pointer-events: none;
+}
+
+.photo {
+  filter:
+    drop-shadow(0 2px 2px hsl(232 80% 3% / 0.58))
+    drop-shadow(0 7px 10px hsl(232 80% 3% / 0.48));
+}
+
+.photoFrame {
+  fill: hsl(0 0% 72%);
+  stroke: hsl(0 0% 92% / 0.94);
+  stroke-width: 1.5;
+}
+
+.coverCountBadge {
+  pointer-events: none;
+}
+
+.coverCountBadge rect {
+  fill: hsl(280 48% 31%);
+  stroke: hsl(280 36% 18% / 0.92);
+  stroke-width: 1;
+}
+
+.coverCountBadge text {
+  fill: hsl(0 0% 100% / 0.96);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-anchor: middle;
+}
+
+@media (prefers-contrast: more) {
+  .photoFrame {
+    stroke: white;
+    stroke-width: 2.5;
+  }
+
+  .coverCountBadge rect {
+    fill: hsl(280 62% 25%);
+    stroke: white;
+  }
+}

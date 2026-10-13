@@ -7,14 +7,14 @@ test("cyber map keeps the core filters and controls interactive", async ({ page 
   });
   page.on("pageerror", (error) => browserErrors.push(error.message));
 
-  await page.goto("/map");
+  await page.goto("/map?view=legacy");
 
   const map = page.getByLabel("世界摄影足迹地图");
   await expect(map).toBeVisible();
 
   const asiaFilter = page.getByRole("link", { name: "亚洲" });
   const allFilter = page.getByRole("link", { name: "全部" });
-  await expect(allFilter).toHaveAttribute("aria-pressed", "true");
+  await expect(allFilter).toHaveAttribute("aria-current", "page");
   await expect(page.locator(".map-sphere")).toHaveCount(0);
   await expect(page.locator(".map-grid-layer")).toHaveAttribute("data-grid-size", "10");
   await expect(page.locator(".map-grid-layer")).toHaveAttribute(
@@ -33,7 +33,7 @@ test("cyber map keeps the core filters and controls interactive", async ({ page 
   await expect(page).toHaveURL(/\/map\/asia$/);
   await page.waitForLoadState("networkidle");
   await expect(page.getByLabel("亚洲摄影足迹地图")).toBeVisible();
-  await expect(asiaFilter).toHaveAttribute("aria-pressed", "true");
+  await expect(asiaFilter).toHaveAttribute("aria-current", "page");
   expect(await page.locator(".world-country-path").count()).toBeLessThan(worldCountryCount);
 
   const hoverRegion = page

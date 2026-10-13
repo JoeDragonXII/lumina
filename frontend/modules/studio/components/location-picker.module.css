@@ -1,0 +1,21 @@
+.picker { display: grid; gap: 10px; min-width: 0; container-type: inline-size; }
+.picker > button { justify-self: start; }
+.map { height: 280px; width: 100%; min-width: 0; border-radius: 12px; border: 1px solid var(--ui-line); overflow: hidden; color: #1d252a; }
+.picker p { font-size: 12px; color: var(--ui-muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.map :global(.maplibregl-ctrl-attrib) { color: #333; }
+.search { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr) auto; align-items: end; gap: 8px; min-width: 0; }
+.search label { display: grid; gap: 6px; min-width: 0; font-size: 12px; color: var(--ui-muted); }
+.search input { width: 100%; min-width: 0; }
+@container (max-width: 400px) {
+  .search { grid-template-columns: minmax(0, 1fr) auto; }
+  .search .city { grid-column: 1 / -1; }
+}
+.results { display: grid; max-height: 240px; overflow-y: auto; border: 1px solid var(--ui-line); border-radius: 10px; background: var(--ui-input); }
+.results li + li { border-top: 1px solid var(--ui-line); }
+.results button { display: grid; gap: 5px; width: 100%; padding: 12px; min-height: 44px; text-align: left; }
+.results button:hover, .results button:focus-visible { background: var(--ui-accent-wash); }
+.results strong { font-size: 13px; font-weight: 500; }
+.results span { font-size: 11px; color: var(--ui-muted); overflow-wrap: anywhere; }
+.picker .credit { font-size: 10px; }
+.credit a { text-decoration: underline; text-underline-offset: 2px; }

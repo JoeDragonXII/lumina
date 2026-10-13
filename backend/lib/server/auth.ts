@@ -7,19 +7,21 @@ import { NextResponse, type NextRequest } from "next/server";
 export const adminCookieName = "photo_archive_admin";
 const maxAgeSeconds = 60 * 60 * 24 * 30;
 
+// Local development opens Studio directly; deployments retain authentication.
+export function isAdminAuthRequired() {
+  return process.env.NODE_ENV !== "development" || process.env.ADMIN_AUTH_REQUIRED === "true";
+}
+
 type AuthPayload = {
   role: "admin";
   exp: number;
 };
 
-const getSecret = () => process.env.AUTH_COOKIE_SECRET || "lumina-local-secret";
+const getSecret = () => process.env.AUTH_COOKIE_SECRET || null;
 const getAdminPassword = () => {
   const password = process.env.ADMIN_PASSWORD || process.env.SITE_PASSWORD;
   if (password) return password;
-  if (process.env.NODE_ENV === "production") {
-    console.warn("[auth] ⚠️ 未设置 ADMIN_PASSWORD 环境变量，管理后台无密码保护。");
-  }
-  return "LOCAL_ONLY_NO_PASSWORD";
+  return null;
 };
 
 function safeEqual(left: string, right: string) {
@@ -28,7 +30,9 @@ function safeEqual(left: string, right: string) {
   return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
 }
 function sign(value: string) {
-  return createHmac("sha256", getSecret()).update(value).digest("base64url");
+  const secret = getSecret();
+  if (!secret) throw new Error("请配置 AUTH_COOKIE_SECRET 后使用管理员登录。");
+  return createHmac("sha256", secret).update(value).digest("base64url");
 }
 
 function encodePayload(payload: AuthPayload) {
@@ -46,7 +50,8 @@ function decodePayload(value: string): AuthPayload | null {
 }
 
 export function verifyAdminPassword(password: string) {
-  return safeEqual(password, getAdminPassword());
+  const expected = getAdminPassword();
+  return Boolean(expected && getSecret() && safeEqual(password, expected));
 }
 
 export function setAdminCookie(response: NextResponse) {
@@ -65,7 +70,7 @@ export function clearAdminCookie(response: NextResponse) {
 }
 
 export function verifyAdminToken(token: string | undefined) {
-  if (!token) return false;
+  if (!token || !getSecret() || !getAdminPassword()) return false;
   const [payloadValue, signature, extra] = token.split(".");
   if (!payloadValue || !signature || extra) return false;
   if (!safeEqual(signature, sign(payloadValue))) return false;
@@ -74,10 +79,12 @@ export function verifyAdminToken(token: string | undefined) {
 }
 
 export function hasAdminSession(request: NextRequest) {
+  if (!isAdminAuthRequired()) return true;
   return verifyAdminToken(request.cookies.get(adminCookieName)?.value);
 }
 
 export async function hasAdminPageSession() {
+  if (!isAdminAuthRequired()) return true;
   const cookieStore = await cookies();
   return verifyAdminToken(cookieStore.get(adminCookieName)?.value);
 }

@@ -18,6 +18,8 @@ export function GlobalBackground() {
 
   return (
     <div className="home-flow-background" aria-hidden="true">
+      {/* Static decorative background uses its existing cached asset directly. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img alt="" className="home-flow-background-media" src={HERO_IMAGE} />
       <div className="home-flow-background-shade" />
     </div>

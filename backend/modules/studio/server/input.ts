@@ -26,6 +26,14 @@ function parseLocation(value: unknown): LocationInput | null {
   const displayName = optionalText(item.displayName);
   if (!countryCode || !countryName || !displayName) return null;
 
+  const latitude = optionalNumber(item.latitude);
+  const longitude = optionalNumber(item.longitude);
+  if ((latitude === null) !== (longitude === null) ||
+      (latitude !== null && Math.abs(latitude) > 90) ||
+      (longitude !== null && Math.abs(longitude) > 180)) {
+    throw new Error("经纬度必须成对填写并位于有效范围内。");
+  }
+
   return {
     countryCode: countryCode.toUpperCase(),
     countryName,
@@ -33,8 +41,8 @@ function parseLocation(value: unknown): LocationInput | null {
     regionName: optionalText(item.regionName),
     city: optionalText(item.city),
     displayName,
-    latitude: optionalNumber(item.latitude),
-    longitude: optionalNumber(item.longitude),
+    latitude,
+    longitude,
     source: item.source === "exif" ? "exif" : "manual",
     confirmed: item.confirmed === true,
   };

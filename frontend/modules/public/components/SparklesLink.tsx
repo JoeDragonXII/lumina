@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { m } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 
 /**
  * 带闪光效果的导航链接，外观与 SparklesButton 一致但渲染为 Next.js Link。
@@ -20,10 +20,7 @@ export function SparklesLink({
     <Link
       href={href}
       className={cn(
-        "relative inline-flex items-center justify-center overflow-hidden rounded-full px-6 py-3",
-        "border border-white/20 bg-white/10 text-sm font-medium text-white",
-        "shadow-[0_0_15px_rgba(99,102,241,0.15)]",
-        "transition-all duration-300 hover:bg-white/20 hover:shadow-[0_0_25px_rgba(99,102,241,0.3)]",
+        "ui-button ui-button-secondary relative overflow-hidden px-6",
         className,
       )}
     >
@@ -35,6 +32,7 @@ export function SparklesLink({
 }
 
 function SparkleDots() {
+  const reduceMotion = useReducedMotion();
   const dots = [
     { x: "10%", y: "15%", delay: 0 },
     { x: "85%", y: "20%", delay: 0.4 },
@@ -49,9 +47,9 @@ function SparkleDots() {
       {dots.map((dot, i) => (
         <m.span
           key={i}
-          className="absolute h-1 w-1 rounded-full bg-indigo-300/70"
-          animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5] }}
-          transition={{ duration: 2, delay: dot.delay, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute h-1 w-1 rounded-full bg-[var(--ui-accent-soft)]"
+          animate={reduceMotion ? { opacity: 0.4 } : { opacity: [0, 0.7, 0], scale: [0.5, 1, 0.5] }}
+          transition={{ duration: 2, delay: dot.delay, ease: "easeInOut" }}
           style={{ left: dot.x, top: dot.y }}
         />
       ))}

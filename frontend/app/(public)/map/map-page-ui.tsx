@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { Palette } from "lucide-react";
+import { Button } from "@/components/ui/controls";
 import {
   type CSSProperties,
   type ReactNode,
@@ -18,8 +20,8 @@ import {
   useTransform,
 } from "motion/react";
 
-import HomeDockNav from "@/modules/public/components/HomeDockNav";
 import MapColorCustomizer from "@/modules/map/components/MapColorCustomizer";
+import PhotoGridPreviewOverlay from "@/modules/map/components/PhotoGridPreviewOverlay";
 import SimpleWorldMap from "@/modules/map/components/SimpleWorldMap";
 import { GLOBAL_REGIONS } from "@/modules/map/data/globalRegions";
 import {
@@ -37,7 +39,6 @@ function MagnifyingMapLink({
   mouseX,
   href,
   className,
-  ariaPressed,
   ariaCurrent,
   baseWidth,
   expandedWidth,
@@ -49,7 +50,6 @@ function MagnifyingMapLink({
   mouseX: MotionValue<number>;
   href: string;
   className: string;
-  ariaPressed?: boolean;
   ariaCurrent?: "page";
   baseWidth: number;
   expandedWidth: number;
@@ -95,7 +95,6 @@ function MagnifyingMapLink({
       <Link
         href={href}
         className={className}
-        aria-pressed={ariaPressed}
         aria-current={ariaCurrent}
       >
         {children}
@@ -108,12 +107,16 @@ export default function MapPageUI({
   counts,
   continent,
   display,
+  photoGridPreview = false,
+  routeRoot = "/map",
   theme,
   view,
 }: Readonly<{
   counts: Record<string, number>;
   continent?: string;
   display?: string;
+  photoGridPreview?: boolean;
+  routeRoot?: "/map" | "/preview/map" | "/preview/map-legacy";
   theme?: string;
   view?: string;
 }>) {
@@ -185,11 +188,16 @@ export default function MapPageUI({
   const buildMapHref = (
     pathname: string,
     options?: {
+      nextRegion?: string;
       nextStyle?: "grid" | "classic";
       nextView?: "flat" | "globe";
     },
   ) => {
     const query = new URLSearchParams();
+    const nextRegion = options?.nextRegion ?? activeRegion;
+    if (routeRoot !== "/map" && nextRegion !== ALL_REGIONS) {
+      query.set("continent", nextRegion);
+    }
     if (options?.nextView === "globe") query.set("view", "globe");
     if ((options?.nextStyle ?? mapStyle) === "classic") {
       query.set("display", "classic");
@@ -198,6 +206,10 @@ export default function MapPageUI({
     const queryString = query.toString();
     return queryString ? `${pathname}?${queryString}` : pathname;
   };
+  const scenePath = (region: string) =>
+    routeRoot === "/map" && region !== ALL_REGIONS
+      ? `${routeRoot}/${region}`
+      : routeRoot;
   const regionMouseX = useMotionValue(Number.POSITIVE_INFINITY);
   const viewMouseX = useMotionValue(Number.POSITIVE_INFINITY);
   const styleMouseX = useMotionValue(Number.POSITIVE_INFINITY);
@@ -212,12 +224,7 @@ export default function MapPageUI({
       data-map-palette={paletteTheme}
       style={paletteStyle}
     >
-      <HomeDockNav
-        mapPaletteAction={{
-          active: isColorCustomizerOpen,
-          onClick: () => setIsColorCustomizerOpen((current) => !current),
-        }}
-      />
+      <Button className="page-appearance-action" variant="secondary" aria-label="地图配色" title="地图配色" aria-pressed={isColorCustomizerOpen} onClick={() => setIsColorCustomizerOpen(current => !current)}><Palette size={18} aria-hidden="true" /></Button>
 
       <MapColorCustomizer
         colors={paletteColors}
@@ -244,16 +251,15 @@ export default function MapPageUI({
           <MagnifyingMapLink
             mouseX={regionMouseX}
             href={buildMapHref(
-              "/map",
+              scenePath(ALL_REGIONS),
               canUseGlobe && mapMode === "globe"
-                ? { nextView: "globe" }
-                : undefined,
+                ? { nextRegion: ALL_REGIONS, nextView: "globe" }
+                : { nextRegion: ALL_REGIONS },
             )}
             shellClassName="map-region-item-shell"
             className={`map-region-pill floating-dock-icon ${
               activeRegion === ALL_REGIONS ? "floating-dock-icon-active" : ""
             }`}
-            ariaPressed={activeRegion === ALL_REGIONS}
             ariaCurrent={activeRegion === ALL_REGIONS ? "page" : undefined}
             baseWidth={80}
             expandedWidth={108}
@@ -274,12 +280,13 @@ export default function MapPageUI({
             <MagnifyingMapLink
               key={region.key}
               mouseX={regionMouseX}
-              href={buildMapHref(`/map/${region.key}`)}
+              href={buildMapHref(scenePath(region.key), {
+                nextRegion: region.key,
+              })}
               shellClassName="map-region-item-shell"
               className={`map-region-pill floating-dock-icon ${
                 activeRegion === region.key ? "floating-dock-icon-active" : ""
               }`}
-              ariaPressed={activeRegion === region.key}
               ariaCurrent={activeRegion === region.key ? "page" : undefined}
               baseWidth={80}
               expandedWidth={108}
@@ -307,7 +314,9 @@ export default function MapPageUI({
           >
             <MagnifyingMapLink
               mouseX={viewMouseX}
-              href={buildMapHref("/map")}
+              href={buildMapHref(scenePath(ALL_REGIONS), {
+                nextRegion: ALL_REGIONS,
+              })}
               shellClassName="map-view-item-shell"
               className={mapMode === "flat" ? "is-active" : ""}
               ariaCurrent={mapMode === "flat" ? "page" : undefined}
@@ -327,7 +336,10 @@ export default function MapPageUI({
             </MagnifyingMapLink>
             <MagnifyingMapLink
               mouseX={viewMouseX}
-              href={buildMapHref("/map", { nextView: "globe" })}
+              href={buildMapHref(scenePath(ALL_REGIONS), {
+                nextRegion: ALL_REGIONS,
+                nextView: "globe",
+              })}
               shellClassName="map-view-item-shell"
               className={mapMode === "globe" ? "is-active" : ""}
               ariaCurrent={mapMode === "globe" ? "page" : undefined}
@@ -356,7 +368,8 @@ export default function MapPageUI({
         >
           <MagnifyingMapLink
             mouseX={styleMouseX}
-            href={buildMapHref(activeRegion === ALL_REGIONS ? "/map" : `/map/${activeRegion}`, {
+            href={buildMapHref(scenePath(activeRegion), {
+              nextRegion: activeRegion,
               nextStyle: "grid",
               nextView: mapMode,
             })}
@@ -379,7 +392,8 @@ export default function MapPageUI({
           </MagnifyingMapLink>
           <MagnifyingMapLink
             mouseX={styleMouseX}
-            href={buildMapHref(activeRegion === ALL_REGIONS ? "/map" : `/map/${activeRegion}`, {
+            href={buildMapHref(scenePath(activeRegion), {
+              nextRegion: activeRegion,
               nextStyle: "classic",
               nextView: mapMode,
             })}
@@ -405,12 +419,21 @@ export default function MapPageUI({
         <section className="map-stage-section" aria-label="摄影足迹地图">
           <SimpleWorldMap
             key={`${activeRegion}-${mapMode}-${mapStyle}-${paletteTheme}`}
+            allowCountryNavigation={!photoGridPreview}
             colors={paletteColors}
             counts={counts}
             continent={activeRegion === ALL_REGIONS ? undefined : activeRegion}
             isDark={paletteTheme === "night-violet"}
             mode={mapMode}
+            renderOverlay={
+              photoGridPreview
+                ? (context) => (
+                    <PhotoGridPreviewOverlay context={context} />
+                  )
+                : undefined
+            }
             renderStyle={mapStyle}
+            showMarkers={!photoGridPreview}
           />
         </section>
       </m.main>

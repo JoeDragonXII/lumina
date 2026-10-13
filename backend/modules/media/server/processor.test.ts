@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { libraryRepository } from "@backend/modules/library/server/repository";
 import { processPhotoUpload } from "@backend/modules/media/server/processor";
 import { emptyPhotoMetadata } from "@backend/modules/media/server/metadata";
+import { editPhotoMetadata } from "@backend/modules/studio/server/photoMetadata";
 import { resolveDataPath } from "@backend/modules/media/server/storage";
 
 describe("processPhotoUpload", () => {
@@ -92,6 +93,12 @@ describe("processPhotoUpload", () => {
       latitude: 34.7466,
       longitude: 113.6254,
     });
+    editPhotoMetadata({ ids: [imported.asset.id], patch: { latitude: 45.77, longitude: 126.65, cameraModel: "Manual camera" } });
+    const repeated = await processPhotoUpload(
+      { name: "sample.ARW", type: "", buffer: rawBuffer },
+      { rawMetadataExtractor: async () => ({ ...emptyPhotoMetadata(), latitude: 34.7466, longitude: 113.6254, cameraModel: "EXIF camera" }) },
+    );
+    expect(repeated.asset).toMatchObject({ latitude: 45.77, longitude: 126.65, cameraModel: "Manual camera" });
   });
 
   it("rejects corrupt input without creating an asset", async () => {

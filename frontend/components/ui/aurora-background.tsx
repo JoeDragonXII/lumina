@@ -19,7 +19,8 @@ export function AuroraBackground({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animationId: number;
+    let animationId = 0;
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let time = 0;
 
     const resize = () => {
@@ -43,9 +44,9 @@ export function AuroraBackground({
         );
 
         const colors = [
-          ["rgba(59, 130, 246, 0.15)", "rgba(147, 51, 234, 0.1)", "rgba(236, 72, 153, 0.05)"],
-          ["rgba(16, 185, 129, 0.1)", "rgba(59, 130, 246, 0.1)", "rgba(99, 102, 241, 0.08)"],
-          ["rgba(236, 72, 153, 0.08)", "rgba(168, 85, 247, 0.1)", "rgba(59, 130, 246, 0.12)"],
+          ["rgba(127, 150, 146, 0.12)", "rgba(110, 125, 155, 0.08)", "rgba(195, 144, 89, 0.05)"],
+          ["rgba(127, 150, 146, 0.08)", "rgba(110, 125, 155, 0.08)", "rgba(127, 150, 146, 0.06)"],
+          ["rgba(195, 144, 89, 0.06)", "rgba(127, 150, 146, 0.08)", "rgba(110, 125, 155, 0.10)"],
         ];
 
         gradient.addColorStop(0, colors[i][0]);
@@ -72,13 +73,18 @@ export function AuroraBackground({
         ctx.fill();
       }
 
-      animationId = requestAnimationFrame(draw);
+      if (!motion.matches && !document.hidden) animationId = requestAnimationFrame(draw);
     };
     draw();
+    const restart = () => { cancelAnimationFrame(animationId); draw(); };
+    motion.addEventListener("change", restart);
+    document.addEventListener("visibilitychange", restart);
 
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", resize);
+      motion.removeEventListener("change", restart);
+      document.removeEventListener("visibilitychange", restart);
     };
   }, []);
 

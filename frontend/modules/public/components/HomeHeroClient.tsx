@@ -27,12 +27,11 @@ export function HomeHeroClient({
           text="时间继续。"
           className="my-3 text-4xl font-bold tracking-wide text-white sm:text-5xl md:text-6xl lg:text-7xl"
           as="h1"
+          delay={0.45}
         />
 
         <p className="mx-auto mt-6 max-w-lg text-base leading-relaxed text-neutral-300 sm:text-lg md:mt-8 md:max-w-xl">
-          把那些对你们来说最重要的地点串成一条路线，
-          <br />
-          像一本安放在地图上的相册，一页一页翻过去。
+          在有光的地方，留下记忆。
         </p>
       </div>
     </PageHeroBackground>

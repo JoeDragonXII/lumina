@@ -16,7 +16,10 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
-    "frontend/.next/**",
+    "frontend/.next*/**",
+    "docs/**",
+    "collab/**",
+    ".codebuddy/**",
     "frontend/.next-e2e/**",
     "frontend/.next-stale-*/**",
     "lumina-release/**",

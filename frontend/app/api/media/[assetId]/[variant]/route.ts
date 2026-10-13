@@ -25,7 +25,9 @@ export async function GET(request: NextRequest, context: { params: Promise<{ ass
       headers: {
         "Content-Type": storedVariant.mimeType,
         "Content-Length": String(content.length),
-        "Cache-Control": isPublic ? "public, max-age=31536000, immutable" : "private, no-store",
+        "Cache-Control": isPublic && process.env.NODE_ENV !== "development"
+          ? "public, max-age=31536000, immutable"
+          : "private, no-store",
       },
     });
   } catch {

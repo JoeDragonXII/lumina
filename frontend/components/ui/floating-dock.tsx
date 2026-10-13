@@ -1,7 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { type MotionValue, m, useMotionValue, useSpring, useTransform } from "motion/react";
+import Link from "next/link";
+import { type MotionValue, m, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react";
 import { useRef, useState } from "react";
 
 type DockItem = {
@@ -16,17 +17,20 @@ export function FloatingDock({
   items,
   className,
   orientation = "horizontal",
+  magnify = true,
 }: {
   items: DockItem[];
   className?: string;
   orientation?: "horizontal" | "vertical";
+  magnify?: boolean;
 }) {
   const mouseAxis = useMotionValue(Infinity);
   const vertical = orientation === "vertical";
+  const reduceMotion = useReducedMotion();
 
   return (
     <m.div
-      onMouseMove={(e) => mouseAxis.set(vertical ? e.pageY : e.pageX)}
+      onMouseMove={(e) => mouseAxis.set(reduceMotion ? Infinity : vertical ? e.clientY : e.clientX)}
       onMouseLeave={() => mouseAxis.set(Infinity)}
       className={cn(
         "floating-dock mx-auto flex items-center gap-4 rounded-2xl backdrop-blur-sm",
@@ -34,8 +38,8 @@ export function FloatingDock({
         className,
       )}
     >
-      {items.map((item, idx) => (
-        <DockIcon key={idx} mouseAxis={mouseAxis} vertical={vertical} {...item} />
+      {items.map((item) => (
+        <DockIcon key={item.href || item.label} mouseAxis={mouseAxis} vertical={vertical} magnify={magnify} {...item} />
       ))}
     </m.div>
   );
@@ -49,6 +53,7 @@ function DockIcon({
   href,
   onClick,
   active,
+  magnify,
 }: {
   mouseAxis: MotionValue<number>;
   vertical: boolean;
@@ -57,6 +62,7 @@ function DockIcon({
   href?: string;
   onClick?: () => void;
   active?: boolean;
+  magnify: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState(false);
@@ -68,31 +74,23 @@ function DockIcon({
       : val - bounds.x - bounds.width / 2;
   });
 
-  const sizeSync = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
+  const sizeSync = useTransform(distance, [-120, 0, 120], [44, magnify ? 56 : 44, 44]);
   const size = useSpring(sizeSync, { mass: 0.1, stiffness: 150, damping: 12 });
 
-  const Comp = href ? "a" : "button";
-  const extra = href ? { href } : { type: "button" as const, onClick };
+  const controlClass = cn("floating-dock-icon flex h-full w-full items-center justify-center rounded-xl transition-colors", active && "floating-dock-icon-active");
 
   return (
     <m.div
       ref={ref}
-      style={vertical ? { height: size, width: size } : { width: size }}
+      style={vertical ? { height: size, width: size } : { height: 44, width: size }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onBlur={() => setHovered(false)}
       className="relative flex aspect-square items-center justify-center"
     >
-      <Comp
-        {...extra}
-        aria-label={label}
-        aria-current={active ? "page" : undefined}
-        className={cn(
-          "floating-dock-icon flex h-full w-full items-center justify-center rounded-xl transition-colors",
-          active && "floating-dock-icon-active",
-        )}
-      >
-        {icon}
-      </Comp>
+      {href ? <Link href={href} aria-label={label} aria-current={active ? "page" : undefined} className={controlClass}>{icon}</Link>
+        : <button type="button" onClick={onClick} aria-label={label} aria-pressed={active} className={controlClass}>{icon}</button>}
       {hovered && (
         <m.div
           initial={{ opacity: 0, ...(vertical ? { x: 10 } : { y: 10 }) }}

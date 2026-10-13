@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("map palette switches presets and persists three custom colors", async ({
   page,
 }) => {
-  await page.goto("/map");
+  await page.goto("/map?view=legacy");
   await page.evaluate(() => localStorage.clear());
   await page.reload();
 

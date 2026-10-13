@@ -107,7 +107,7 @@ function validateCollection(input: CollectionInput) {
   };
 }
 
-function toAssetRecord(
+export function toAssetRecord(
   asset: typeof photoAssets.$inferSelect,
   variants: Array<typeof photoVariants.$inferSelect>,
   alt = "",
@@ -147,18 +147,25 @@ function hydrateCollection(row: typeof collections.$inferSelect): CollectionReco
   const locationRow = row.locationId
     ? db.select().from(locations).where(eq(locations.id, row.locationId)).get() || null
     : null;
-  const photoLinks = db
-    .select()
+  // Fetch all assets and variants together instead of two queries per photo.
+  const photoRows = db
+    .select({ link: collectionPhotos, asset: photoAssets, variant: photoVariants })
     .from(collectionPhotos)
+    .innerJoin(photoAssets, eq(photoAssets.id, collectionPhotos.assetId))
+    .leftJoin(photoVariants, eq(photoVariants.assetId, photoAssets.id))
     .where(eq(collectionPhotos.collectionId, row.id))
-    .orderBy(asc(collectionPhotos.position))
+    .orderBy(asc(collectionPhotos.position), asc(photoVariants.variant))
     .all();
-  const photos = photoLinks.flatMap((link) => {
-    const asset = db.select().from(photoAssets).where(eq(photoAssets.id, link.assetId)).get();
-    if (!asset) return [];
-    const variants = db.select().from(photoVariants).where(eq(photoVariants.assetId, asset.id)).all();
-    return [toAssetRecord(asset, variants, link.alt, link.position)];
-  });
+  const photoMap = new Map<string, PhotoAssetRecord>();
+  for (const { link, asset, variant } of photoRows) {
+    let photo = photoMap.get(asset.id);
+    if (!photo) {
+      photo = toAssetRecord(asset, [], link.alt, link.position);
+      photoMap.set(asset.id, photo);
+    }
+    if (variant) photo.variants.push({ variant: variant.variant, width: variant.width, height: variant.height, bytes: variant.bytes });
+  }
+  const photos = [...photoMap.values()];
   const tagRows = db
     .select({ name: tags.name })
     .from(collectionTags)
@@ -252,16 +259,16 @@ export const libraryRepository = {
     if (!current) return null;
     db.update(photoAssets)
       .set({
-        takenAt: metadata.takenAt ?? current.takenAt,
-        cameraMake: metadata.cameraMake ?? current.cameraMake,
-        cameraModel: metadata.cameraModel ?? current.cameraModel,
-        lens: metadata.lens ?? current.lens,
-        focalLength: metadata.focalLength ?? current.focalLength,
-        aperture: metadata.aperture ?? current.aperture,
-        shutterSpeed: metadata.shutterSpeed ?? current.shutterSpeed,
-        iso: metadata.iso === null || metadata.iso === undefined ? current.iso : Math.round(metadata.iso),
-        latitude: metadata.latitude ?? current.latitude,
-        longitude: metadata.longitude ?? current.longitude,
+        takenAt: current.takenAt ?? metadata.takenAt,
+        cameraMake: current.cameraMake ?? metadata.cameraMake,
+        cameraModel: current.cameraModel ?? metadata.cameraModel,
+        lens: current.lens ?? metadata.lens,
+        focalLength: current.focalLength ?? metadata.focalLength,
+        aperture: current.aperture ?? metadata.aperture,
+        shutterSpeed: current.shutterSpeed ?? metadata.shutterSpeed,
+        iso: current.iso ?? (metadata.iso == null ? null : Math.round(metadata.iso)),
+        latitude: current.latitude ?? metadata.latitude,
+        longitude: current.longitude ?? metadata.longitude,
       })
       .where(eq(photoAssets.id, id))
       .run();
@@ -435,6 +442,9 @@ export const libraryRepository = {
     if (!filters.includeDeleted) conditions.push(isNull(collections.deletedAt));
     if (filters.visibility && filters.visibility !== "all") conditions.push(eq(collections.visibility, filters.visibility));
     if (!filters.visibility) conditions.push(eq(collections.visibility, "public"));
+
+    if (filters.category) conditions.push(eq(collections.category, filters.category));
+    if (typeof filters.featured === "boolean") conditions.push(eq(collections.featured, filters.featured));
 
     const rows = db
       .select()

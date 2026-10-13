@@ -54,6 +54,26 @@ async function inspectPreview(buffer: Buffer): Promise<PreviewCandidate | null> 
   }
 }
 
+/** Embedded RAW JPEGs often omit the orientation stored on the RAW container. */
+export async function orientRawPreview(buffer: Buffer, rawOrientation?: number) {
+  const metadata = await sharp(buffer).metadata();
+  // A preview with its own orientation (including 1) is authoritative.
+  const orientation = metadata.orientation ?? rawOrientation ?? 1;
+  if (!Number.isInteger(orientation) || orientation < 2 || orientation > 8) return buffer;
+  let pipeline = sharp(buffer);
+  switch (orientation) {
+    case 2: pipeline = pipeline.flop(); break;
+    case 3: pipeline = pipeline.rotate(180); break;
+    case 4: pipeline = pipeline.flip(); break;
+    case 5: pipeline = pipeline.flip().rotate(90); break;
+    case 6: pipeline = pipeline.rotate(90); break;
+    case 7: pipeline = pipeline.flop().rotate(90); break;
+    case 8: pipeline = pipeline.rotate(270); break;
+  }
+  // Lossless intermediate; stripping EXIF prevents the importer rotating twice.
+  return pipeline.png().toBuffer();
+}
+
 export async function extractRawPreview(sourcePath: string) {
   const tool = getRawExifTool();
   const extracted = await Promise.all(
@@ -66,6 +86,12 @@ export async function extractRawPreview(sourcePath: string) {
     }),
   );
   const candidates = extracted.filter((candidate): candidate is PreviewCandidate => candidate !== null);
+
+  if (candidates.length > 0) {
+    const largest = candidates.sort((left, right) => right.pixels - left.pixels)[0];
+    const tags = await tool.read(sourcePath, { readArgs: ["-Orientation#"] });
+    return orientRawPreview(largest.buffer, tags.Orientation);
+  }
 
   if (candidates.length === 0) {
     try {

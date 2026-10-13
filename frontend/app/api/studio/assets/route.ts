@@ -2,11 +2,27 @@ import { NextResponse, type NextRequest } from "next/server";
 import { requireAdminSession, requireSameOrigin } from "@backend/lib/server/auth";
 import { processPhotoUpload } from "@backend/modules/media/server/processor";
 import { inferLocationFromCoordinates } from "@backend/modules/map/server/inferLocation";
+import { editPhotoMetadata } from "@backend/modules/studio/server/photoMetadata";
+import { revalidatePath } from "next/cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const maxFileBytes = 200 * 1024 * 1024;
+
+export async function PATCH(request: NextRequest) {
+  const authError = requireAdminSession(request);
+  if (authError) return authError;
+  const originError = requireSameOrigin(request);
+  if (originError) return originError;
+  try {
+    const assets = editPhotoMetadata(await request.json());
+    revalidatePath("/", "layout");
+    return NextResponse.json({ assets });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "保存失败。" }, { status: 400 });
+  }
+}
 
 export async function POST(request: NextRequest) {
   const authError = requireAdminSession(request);

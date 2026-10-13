@@ -85,7 +85,7 @@ pnpm build</pre></article>
 cp frontend/.env.example frontend/.env.local
 pnpm dev
 # http://localhost:3002</pre><p>Windows PowerShell 可使用 <code>Copy-Item frontend/.env.example frontend/.env.local</code>。</p></article>
-      <article class="card"><h3>发布边界</h3><p>开发区可以包含协作文档、测试产物和本地数据；发布包应只保留应用源码、公共资源和示例配置。</p></article>
+      <article class="card"><h3>发布边界</h3><p>开发区可以包含协作文档、测试产物和本地数据；<code>scripts/pack-release.ps1</code> 将其导出为项目内的 <code>lumina-release/</code>，再由该目录独立提交和推送。</p></article>
     </div></section>
   </main>
   <footer><div class="wrap">Lumina · 本地优先的个人摄影档案系统 · 当前未声明开源许可证</div></footer>

@@ -1,5 +1,7 @@
 # Lumina
 
+Current release: **0.2.0**. See [Changelog](CHANGELOG.md) for the complete frontend, Studio, map, and performance updates.
+
 [简体中文](README.zh-CN.md)
 
 [产品说明（HTML）](README.html)
@@ -37,6 +39,8 @@ Open [http://localhost:3002](http://localhost:3002).
 On Windows PowerShell, use `Copy-Item frontend/.env.example frontend/.env.local` instead of `cp`.
 
 Before using the Studio in any real environment, set a strong `ADMIN_PASSWORD` and `AUTH_COOKIE_SECRET` in `frontend/.env.local`.
+
+Local development opens Studio directly by default. Set `ADMIN_AUTH_REQUIRED=true` to enable local login. Production requires both password and cookie secret; missing configuration blocks authentication.
 
 ## Configuration
 
@@ -82,7 +86,7 @@ pnpm test:e2e     # Run Playwright end-to-end tests
 frontend/   Next.js routes, React components, styles, and public assets
 backend/    SQLite, media processing, backups, location logic, and validation
 tests/      Unit and Playwright end-to-end tests
-scripts/    Local development utilities
+scripts/    Local development and release utilities
 ```
 
 The frontend uses `@/*` for `frontend/*` and `@backend/*` for backend imports. API route files are kept thin; business logic belongs in `backend/`.
@@ -90,6 +94,16 @@ The frontend uses `@/*` for `frontend/*` and `@backend/*` for backend imports. A
 ## Data and backups
 
 Lumina is designed for personal, local data. Backups are written to the configured backup directory and include the SQLite library plus a manifest. Keep the data and backup directories private and back them up using your normal storage policy.
+
+## Release packaging
+
+The development workspace may contain collaboration notes, test output, and private local data. The release export script creates the clean package at `lumina-release/` and excludes those development-only and sensitive files:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/pack-release.ps1
+```
+
+The exported `lumina-release/` directory is the publishable application tree.
 
 ## License
 

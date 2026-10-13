@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { LockKeyhole } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Button, Input } from "@/components/ui/controls";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -31,24 +32,24 @@ export default function LoginForm() {
 
   return (
     <form className="mt-8" onSubmit={submit}>
-      <label className="text-sm font-medium text-neutral-800" htmlFor="admin-password">
+      <label className="text-sm font-medium text-[var(--ui-muted)]" htmlFor="admin-password">
         管理密码
       </label>
-      <div className="mt-2 flex items-center gap-3 border border-neutral-300 bg-white px-3 py-3">
+      <div className="studio-password">
         <LockKeyhole className="h-4 w-4 text-neutral-500" />
-        <input
+        <Input
           autoFocus
-          className="min-w-0 flex-1 bg-transparent outline-none"
+          autoComplete="current-password"
           id="admin-password"
           type="password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
         />
       </div>
-      {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
-      <button className="mt-5 w-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50" disabled={loading}>
+      {error ? <p role="alert" className="mt-3 text-sm text-[var(--ui-danger)]">{error}</p> : null}
+      <Button type="submit" variant="primary" className="mt-5 w-full" disabled={loading}>
         {loading ? "正在登录..." : "进入 Studio"}
-      </button>
+      </Button>
     </form>
   );
 }

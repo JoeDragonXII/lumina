@@ -1,11 +1,11 @@
 export const publicMotion = {
   duration: {
-    fast: 0.22,
-    base: 0.48,
-    slow: 0.8,
+    fast: 0.14,
+    base: 0.2,
+    slow: 0.28,
   },
   ease: [0.22, 1, 0.36, 1] as const,
-  revealDistance: 24,
+  revealDistance: 12,
 } as const;
 
 export const revealVariant = {

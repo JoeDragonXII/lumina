@@ -31,4 +31,10 @@ describe("parseCollectionInput", () => {
   it("falls back to a draft for invalid visibility", () => {
     expect(parseCollectionInput({ visibility: "everyone" }).visibility).toBe("draft");
   });
+
+  it("rejects incomplete or out-of-range location coordinates", () => {
+    for (const coordinates of [{ latitude: 91, longitude: 120 }, { latitude: 30, longitude: 181 }, { latitude: 30 }]) {
+      expect(() => parseCollectionInput({ location: { countryCode: "CN", countryName: "中国", displayName: "测试", ...coordinates } })).toThrow("经纬度");
+    }
+  });
 });

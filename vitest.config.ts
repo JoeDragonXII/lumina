@@ -12,11 +12,13 @@ export default defineConfig({
   test: {
     environment: "node",
     exclude: [
+      "docs/**",
+      "collab/**",
+      ".codebuddy/**",
       "tests/e2e/**",
       "node_modules/**",
       ".next/**",
-      "frontend/.next/**",
-      "frontend/.next-e2e/**",
+      "frontend/.next*/**",
       "lumina-release/**",
     ],
     setupFiles: ["./tests/support/setup.ts"],

@@ -1,6 +1,7 @@
 import { ExifDateTime, type Tags } from "exiftool-vendored";
 import { describe, expect, it } from "vitest";
-import { normalizeRawMetadata } from "@backend/modules/media/server/raw";
+import sharp from "sharp";
+import { normalizeRawMetadata, orientRawPreview } from "@backend/modules/media/server/raw";
 
 describe("normalizeRawMetadata", () => {
   it("normalizes timezone-aware dates, exposure values and signed GPS coordinates", () => {
@@ -31,5 +32,36 @@ describe("normalizeRawMetadata", () => {
     });
     expect(metadata.latitude).toBeCloseTo(34.7466, 6);
     expect(metadata.longitude).toBeCloseTo(113.6254, 6);
+  });
+});
+
+describe("RAW preview orientation", () => {
+  const pixels = Buffer.from([1, 2, 3, 4, 5, 6].flatMap(value => [value, value, value]));
+  const expected = [
+    [1, 2, 3, 4, 5, 6], [3, 2, 1, 6, 5, 4],
+    [6, 5, 4, 3, 2, 1], [4, 5, 6, 1, 2, 3],
+    [1, 4, 2, 5, 3, 6], [4, 1, 5, 2, 6, 3],
+    [6, 3, 5, 2, 4, 1], [3, 6, 2, 5, 1, 4],
+  ];
+  async function preview(orientation?: number) {
+    const image = sharp(pixels, { raw: { width: 3, height: 2, channels: 3 } });
+    return (orientation ? image.withMetadata({ orientation }) : image).png().toBuffer();
+  }
+  it.each([1, 2, 3, 4, 5, 6, 7, 8])("applies RAW orientation %i to an untagged preview", async orientation => {
+    const buffer = await orientRawPreview(await preview(), orientation);
+    // The upload pipeline auto-orients again; this must not rotate twice.
+    const output = await sharp(buffer).rotate().raw().toBuffer({ resolveWithObject: true });
+    expect(output.info.width).toBe(orientation >= 5 ? 2 : 3);
+    expect(output.info.height).toBe(orientation >= 5 ? 3 : 2);
+    expect([...output.data].filter((_, i) => i % output.info.channels === 0)).toEqual(expected[orientation - 1]);
+  });
+  it.each([1, 6, 8])("respects a preview's own orientation %i instead of the container", async orientation => {
+    const buffer = await orientRawPreview(await preview(orientation), 8);
+    const output = await sharp(buffer).rotate().raw().toBuffer({ resolveWithObject: true });
+    expect([...output.data].filter((_, i) => i % output.info.channels === 0)).toEqual(expected[orientation - 1]);
+  });
+  it("keeps untagged landscapes unchanged", async () => {
+    const buffer = await preview();
+    expect(await orientRawPreview(buffer)).toBe(buffer);
   });
 });

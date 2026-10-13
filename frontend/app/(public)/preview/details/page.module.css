@@ -1,0 +1,61 @@
+.page { --paper: #f5f2ec; --ink: #302f2e; --muted: #726e69; --accent: #60367c; --line: #ddd8cf; min-height: 100svh; background: var(--paper); color: var(--ink); padding: 0 clamp(20px, 4vw, 72px) 64px; font-family: var(--font-sans, system-ui, sans-serif); }
+.page a { text-decoration: none; }
+.status { padding: 20vh 0; text-align: center; color: var(--muted); }
+.status button { margin: 20px; min-height: 44px; padding: 0 24px; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; }
+.status button:focus-visible { outline: 2px solid var(--accent); }
+.photoControls a:active,.mapLink:active { background: #eae3ee; }
+.page a:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; }
+.header { min-height: 96px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 12px; min-height: 44px; font-size: 11px; letter-spacing: .2em; font-weight: 700; }
+.switcher { display: flex; padding: 4px; background: #eae6df; border-radius: 999px; }
+.switcher a { display: grid; place-items: center; min-height: 40px; padding: 0 18px; border-radius: 999px; font-size: 12px; color: var(--muted); }
+.switcher a[aria-current] { background: #fffcf7; color: var(--accent); box-shadow: 0 1px 3px #302f2e0d; }
+.study,.eyebrow { font-size: 11px; color: var(--muted); letter-spacing: .1em; }
+.eyebrow { color: var(--accent); }
+.page h1,.page h2,.page h3 { font-family: Georgia, 'Noto Serif SC', serif; font-weight: 500; text-wrap: balance; }
+.page h1 { font-size: clamp(28px, 3.8vw, 60px); line-height: 1.2; margin: 18px 0 24px; }
+.page h2 { font-size: 22px; }
+.photoLayout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: clamp(28px, 5vw, 88px); padding-top: 44px; }
+.photoStage { min-width: 0; }
+.fullPhoto { position: relative; height: min(70vh, 820px); background: #eae6df; }
+.contain { object-fit: contain !important; padding: 20px; }
+.page img { object-fit: cover; }
+.photoControls { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.photoControls a,.photoControls>span:first-child,.photoControls>span:last-child { width: 44px; min-height: 44px; display: grid; place-items: center; }
+.photoInfo { padding-top: 24px; }
+.photoInfo h1 { font-size: 32px; }
+.placeLink { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; min-height: 44px; }
+.story { font-size: 14px; line-height: 1.9; margin: 28px 0; white-space: pre-line; }
+.facts { padding-top: 20px; border-top: 1px solid var(--line); }
+.facts div { margin-bottom: 16px; }
+.facts dt { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+.facts dd { margin: 0; font-size: 12px; line-height: 1.6; }
+.collectionJump { display: flex; justify-content: space-between; gap: 12px; align-items: center; border-top: 1px solid var(--line); margin-top: 24px; padding-top: 24px; color: var(--accent); font-size: 11px; }
+.collectionJump strong { display: block; font-size: 14px; margin-top: 8px; font-weight: 500; }
+.collectionHero { display: grid; grid-template-columns: .8fr 1.2fr; gap: 60px; align-items: center; padding: 48px 0; }
+.collectionHero p { font-size: 12px; color: var(--muted); }
+.cover { position: relative; height: clamp(320px, 54vh, 640px); }
+.collectionIntro { display: grid; grid-template-columns: .8fr 1.2fr; gap: 60px; padding: 20px 0 48px; border-bottom: 1px solid var(--line); }
+.collectionIntro p { line-height: 1.9; max-width: 600px; white-space: pre-line; font-size: 14px; }
+.photoGrid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 32px 24px; margin-top: 44px; }
+.gridPhoto>div { position: relative; aspect-ratio: 4/5; }
+.gridPhoto:nth-child(4n+1) { grid-column: span 2; }
+.gridPhoto:nth-child(4n+1)>div { aspect-ratio: 8/5; }
+.gridPhoto>span { display: block; font-size: 10px; color: var(--muted); margin-top: 10px; }
+.placeHero { display: grid; grid-template-columns: 1.2fr .8fr; gap: clamp(32px,6vw,96px); align-items: center; padding: 48px 0; }
+.placeCover { position: relative; min-height: 500px; }
+.placeInfo h1 { font-size: clamp(32px,4vw,56px); }
+.placeDescription { font-size: 14px; line-height: 1.9; color: var(--muted); }
+.placeStats { display: flex; gap: 44px; padding: 28px 0; border-bottom: 1px solid var(--line); margin: 0 0 24px; }
+.placeStats dd { margin: 0 0 8px; font: 40px Georgia,serif; }
+.placeStats dt,.coordinates { font-size: 11px; color: var(--muted); }
+.coordinates { display: block; font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+.mapLink { display: flex; align-items: center; width: fit-content; gap: 12px; padding: 12px 18px; border: 1px solid var(--line); border-radius: 999px; margin-top: 24px; font-size: 12px; color: var(--accent); }
+.related { border-top: 1px solid var(--line); padding-top: 28px; }
+.related header { display: flex; justify-content: space-between; align-items: center; }
+.related header span,.relatedCard>span { font-size: 11px; color: var(--muted); }
+.related>div { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 28px; margin-top: 28px; }
+.relatedCard>div { position: relative; aspect-ratio: 3/2; }
+.relatedCard h3 { font-size: 18px; margin: 16px 0 8px; }
+@media (hover:hover) and (pointer:fine) { .page a:hover { color: var(--accent); } .mapLink:hover { background: #eae3ee; } }
+@media (max-width:760px) { .header { flex-wrap: wrap; padding: 16px 0; gap: 12px; } .study { display: none; } .switcher a { padding: 0 12px; } .photoLayout,.collectionHero,.collectionIntro,.placeHero { grid-template-columns: 1fr; gap: 24px; padding-top: 28px; } .photoInfo { padding-top: 0; } .fullPhoto { height: 55svh; } .contain { padding: 10px; } .collectionHero { padding-bottom: 20px; } .cover { height: 44svh; } .placeCover { min-height: 340px; } .placeHero { padding-bottom: 36px; } .photoGrid,.related>div { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px 16px; } .gridPhoto:nth-child(4n+1) { grid-column: span 2; } }

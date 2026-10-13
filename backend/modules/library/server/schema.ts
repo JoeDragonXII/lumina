@@ -97,6 +97,7 @@ export const collectionPhotos = sqliteTable(
   (table) => [
     primaryKey({ columns: [table.collectionId, table.assetId] }),
     index("collection_photos_position_index").on(table.collectionId, table.position),
+    index("collection_photos_asset_index").on(table.assetId, table.collectionId),
   ],
 );
 

@@ -20,7 +20,7 @@ export function TimelineShowcase({
   return (
     <div className={cn("relative", className)}>
       {/* Vertical line */}
-      <div className="absolute left-[19px] top-2 bottom-2 w-px bg-gradient-to-b from-blue-500/50 via-purple-500/50 to-pink-500/50" />
+      <div className="ui-timeline-line absolute left-[19px] top-2 bottom-2 w-px" />
 
       <div className="flex flex-col gap-8">
         {items.map((item, idx) => (
@@ -33,24 +33,22 @@ export function TimelineShowcase({
             className="relative flex gap-6"
           >
             {/* Dot on the line */}
-            <div className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-neutral-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
+            <div className="ui-surface relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
               {item.icon || (
                 <m.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-blue-500 to-purple-500"
+                  className="h-2.5 w-2.5 rounded-full bg-[var(--ui-accent)]"
                 />
               )}
             </div>
 
             <div className="pt-1">
-              <span className="mb-1 block text-xs font-medium tracking-wide text-neutral-400 uppercase dark:text-neutral-500">
+              <span className="mb-1 block text-xs font-medium tracking-wide text-[var(--ui-muted)] uppercase">
                 {item.date}
               </span>
-              <h4 className="mb-1 text-base font-semibold text-neutral-900 dark:text-neutral-100">
+              <h4 className="mb-1 text-base font-semibold text-[var(--ui-ink)]">
                 {item.title}
               </h4>
-              <p className="text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
+              <p className="text-sm leading-relaxed text-[var(--ui-muted)]">
                 {item.description}
               </p>
             </div>

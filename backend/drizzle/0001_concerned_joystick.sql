@@ -1,0 +1,1 @@
+CREATE INDEX `collection_photos_asset_index` ON `collection_photos` (`asset_id`,`collection_id`);

@@ -21,9 +21,8 @@ export default function FloatingCollectionWall({ collections }: Readonly<{ colle
             className="masonry-stream-item"
             initial={{ opacity: 0, scale: 0.94, y: 20 }}
             key={`${collection.id}-${photo.id}`}
-            transition={{ duration: publicMotion.duration.slow, delay: index * 0.07, ease: publicMotion.ease }}
+            transition={{ duration: publicMotion.duration.slow, delay: Math.min(index, 4) * 0.04, ease: publicMotion.ease }}
             viewport={{ amount: 0.25, once: true }}
-            whileHover={{ y: -4 }}
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
           >
             <div className="masonry-stream-link">

@@ -1,14 +1,12 @@
-import { rmSync } from "fs";
+import { mkdtempSync, rmSync } from "fs";
+import { tmpdir } from "os";
 import path from "path";
-import { afterAll, beforeAll } from "vitest";
+import { afterAll } from "vitest";
 
-const testDataRoot = path.join(process.cwd(), ".test-data", `vitest-${process.pid}`);
+const testDataRoot = mkdtempSync(path.join(tmpdir(), "lumina-vitest-"));
 process.env.PHOTO_ARCHIVE_DATA_DIR = testDataRoot;
+process.env.PHOTO_ARCHIVE_DB_PATH = path.join(testDataRoot, "library.sqlite");
 process.env.PHOTO_ARCHIVE_BACKUP_DIR = path.join(testDataRoot, "backups");
-
-beforeAll(() => {
-  rmSync(testDataRoot, { recursive: true, force: true });
-});
 
 afterAll(async () => {
   const rawGlobal = globalThis as typeof globalThis & { __photoArchiveRawExifTool?: unknown };

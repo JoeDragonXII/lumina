@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { requireAdminSession, requireSameOrigin } from "@backend/lib/server/auth";
 import { libraryRepository } from "@backend/modules/library/server/repository";
 import { parseCollectionInput } from "@backend/modules/studio/server/input";
+import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,7 @@ export async function PUT(request: NextRequest, context: Context) {
       (await context.params).id,
       parseCollectionInput(await request.json()),
     );
+    revalidatePath("/", "layout");
     return NextResponse.json({ collection });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "图集保存失败。" }, { status: 400 });

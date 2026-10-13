@@ -27,8 +27,8 @@ test("admin can sign in, upload a photo and create a public collection", async (
   await page.getByLabel("管理密码").fill("1234");
   await page.getByRole("button", { name: "进入 Studio" }).click();
   await expect(page).toHaveURL(/\/studio$/);
-  await expect(page.locator('nav a[href="/studio"]')).toHaveCSS("color", "rgb(255, 255, 255)");
-  await expect(page.locator('main a[href="/studio/new"]')).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(page.locator('nav a[href="/studio"]:visible')).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("link", { name: "新建图集", exact: true })).toBeVisible();
 
   await page.getByRole("link", { name: "新建图集" }).click();
   const images = await Promise.all(["#3f6656", "#875044", "#36587a"].map(async (background, index) => ({
@@ -38,7 +38,7 @@ test("admin can sign in, upload a photo and create a public collection", async (
   })));
   await page.locator('input[type="file"]').first().setInputFiles(images);
   await expect(page.getByText(/3 张照片已就绪；拍摄时间 0\/3；GPS 0\/3/)).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByText("原件无 GPS 定位").first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /^编辑照片 playwright-album-/ })).toHaveCount(3);
 
   await page.getByLabel("标题").fill("自动化测试图集");
   await page.getByLabel("状态").selectOption("public");
@@ -85,11 +85,11 @@ test("admin can sign in, upload a photo and create a public collection", async (
   }
 
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /照片留下.*时间继续/ })).toBeVisible();
+  await expect(page.getByRole("region", { name: "首页照片墙" })).toBeVisible();
   await expect(page.getByText("自动化测试图集").first()).toBeVisible();
   await expect(page.getByText("不公开测试图集")).toHaveCount(0);
   await page.reload();
-  await expect(page.getByRole("heading", { name: /照片留下.*时间继续/ })).toBeVisible();
+  await expect(page.getByRole("region", { name: "首页照片墙" })).toBeVisible();
 
   await page.goto("/works");
   await page.goto("/works?category=旅行");
@@ -111,20 +111,19 @@ test("admin can sign in, upload a photo and create a public collection", async (
   await expect(page.getByText("自动化测试图集")).toBeVisible();
   await expect(page.getByText("不公开测试图集")).toHaveCount(0);
 
-  await page.goto("/map");
+  await page.goto("/map?view=legacy");
   await expect(page.getByLabel("中国，1 个图集")).toBeVisible();
   await expect(page.getByLabel("日本，1 个图集")).toBeVisible();
-  await page.getByLabel("中国，1 个图集").click();
-  await page.getByRole("link", { name: /进入地点档案/ }).click();
-  await expect(page).toHaveURL(/\/map\/china$/);
+  await page.goto("/map/china");
+  await expect(page).toHaveURL(/\/map\/asia\/cn$/);
   await expect(page.getByLabel("河南，1 个图集")).toBeVisible();
   await page.getByLabel("河南，1 个图集").click();
   await expect(page.getByRole("link", { name: /进入省份档案/ })).toBeVisible();
   await page.goto("/province/henan");
-  await expect(page).toHaveURL(/\/map\/china\/henan$/);
+  await expect(page).toHaveURL(/\/map\/asia\/cn\/henan$/);
   await expect(page.getByText("河南测试足迹")).toBeVisible();
-  await page.goto("/map/jp");
-  await expect(page.getByText("东京测试足迹")).toBeVisible();
+  await page.goto("/map/asia/jp");
+  await expect(page.getByRole("heading", { name: "东京测试足迹" })).toBeVisible();
 
   await page.goto("/studio/settings");
   await page.getByRole("button", { name: "创建备份" }).click();
@@ -144,10 +143,10 @@ test("admin can sign in, upload a photo and create a public collection", async (
 
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /照片留下.*时间继续/ })).toBeVisible();
+  await expect(page.getByRole("region", { name: "首页照片墙" })).toBeVisible();
   await page.screenshot({ path: "test-results/qa-home-desktop.png", fullPage: true });
-  await page.goto("/map");
-  await expect(page.locator('svg[aria-label="亚洲摄影足迹地图"] path')).toHaveCount(49);
+  await page.goto("/map/asia");
+  await expect(page.locator('svg[aria-label="亚洲摄影足迹地图"] .world-country-path')).toHaveCount(49);
   await page.screenshot({ path: "test-results/qa-map-desktop.png", fullPage: true });
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -155,7 +154,7 @@ test("admin can sign in, upload a photo and create a public collection", async (
   await expect(page.getByRole("navigation").last()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: "test-results/qa-home-mobile.png", fullPage: true });
-  await page.goto("/map");
+  await page.goto("/map/asia");
   const mapBox = await page.locator('svg[aria-label="亚洲摄影足迹地图"]').boundingBox();
   expect(mapBox?.width).toBeGreaterThan(300);
   expect(mapBox?.height).toBeGreaterThan(400);

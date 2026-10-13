@@ -1,5 +1,9 @@
 # Lumina
 
+当前版本：**0.2.0**。本阶段首页、Studio、地图与性能更新见[更新记录](CHANGELOG.md)。
+
+本地开发默认直接进入 Studio，可设置 `ADMIN_AUTH_REQUIRED=true` 启用登录。生产环境必须配置 `ADMIN_PASSWORD` 和 `AUTH_COOKIE_SECRET`，缺少配置时拒绝认证。
+
 [English](README.md)
 
 Lumina 是一个本地优先的个人摄影档案应用。它提供公开展示的图库，以及用于管理图集、地点、时间线和地图视图的密码保护工作室。

@@ -1,44 +1,90 @@
 import Link from "next/link";
-import { ArrowRight, Filter, X } from "lucide-react";
+import { Images, X } from "lucide-react";
 import { archiveCategories } from "@/modules/core/site";
-import { collectionCover, collectionDateLabel, collectionMonth, collectionYear } from "@/modules/library/format";
+import { collectionCover } from "@/modules/library/format";
+import { filterTimeline, groupTimeline, timelineDateLabel, timelineEntry, timelineHref, timelineYears, type TimelineQuery } from "@/modules/library/timeline";
 import { libraryRepository } from "@backend/modules/library/server/repository";
 import { mediaUrl } from "@/modules/media/urls";
-import Image from "next/image";
-import SceneMeta from "@/modules/public/components/SceneMeta";
-import SectionReveal from "@/modules/public/components/SectionReveal";
+import { BeamCard } from "@/components/ui/beam-card";
+import { Button, Input, Select } from "@/components/ui/controls";
+import TimelineCover from "@/modules/public/components/TimelineCover";
+import TimelineFilters from "@/modules/public/components/TimelineFilters";
+import styles from "./timeline.module.css";
 
 export const dynamic = "force-dynamic";
-type SearchParams = Promise<{ year?: string; category?: string; country?: string; city?: string }>;
+type SearchParams = Promise<Record<keyof TimelineQuery, string | string[] | undefined>>;
 
 export default async function TimelinePage({ searchParams }: Readonly<{ searchParams: SearchParams }>) {
-  const query = await searchParams;
-  const all = libraryRepository.listCollections();
-  const items = libraryRepository.listCollections({ year: query.year, category: query.category, country: query.country, city: query.city });
-  const years = [...new Set(all.map(collectionYear))].sort().reverse();
-  const countries = [...new Map(all.flatMap((item) => item.location ? [[item.location.countryCode, item.location.countryName] as const] : [])).entries()];
-  const groups = Map.groupBy(items, collectionYear);
-  const filtered = Boolean(query.year || query.category || query.country || query.city);
-  const atmosphereSource = items[0] || all[0] || null;
-  const atmosphere = atmosphereSource ? collectionCover(atmosphereSource) : null;
-  const atmosphereId = atmosphere?.id;
-  const atmosphereUrl = atmosphereId ? mediaUrl(atmosphereId as string, "large") : undefined;
-  return <main className="public-timeline-page">
-    <header className="timeline-page-hero">
-      {atmosphereUrl ? <Image alt="" aria-hidden="true" className="scene-background-image timeline-page-atmosphere" fill priority sizes="100vw" src={atmosphereUrl as string} /> : null}
-      <div className="timeline-page-shade" />
-      <div className="public-page-container timeline-page-hero-inner"><SectionReveal><SceneMeta index="03" label="Chronology" /><p className="public-kicker">Through the years</p><h1>时间线</h1><p>以拍摄时间为顺序，让作品、旅行和日常回到它们发生的时刻。</p></SectionReveal><SectionReveal className="timeline-year-hero" delay={0.1}>{years.slice(0, 4).map((year, index) => <span className={index === 0 ? "is-current" : ""} key={year}>{year}</span>)}</SectionReveal></div>
+  const raw = await searchParams;
+  const query: TimelineQuery = {};
+  for (const key of ["year", "category", "country", "city"] as const) {
+    const value = raw[key];
+    query[key] = (Array.isArray(value) ? value[0] : value)?.trim() || undefined;
+  }
+  // Only public, non-deleted records reach this page. Timeline date interpretation
+  // stays local to this view; repository filters and other routes are unchanged.
+  const all = libraryRepository.listCollections().map(timelineEntry);
+  const entries = filterTimeline(all, query);
+  const groups = groupTimeline(entries, query.year);
+  const years = timelineYears(all);
+  const countries = [...new Map(all.flatMap(({ collection }) => collection.location ? [[collection.location.countryCode, collection.location.countryName] as const] : [])).entries()]
+    .sort((a, b) => a[1].localeCompare(b[1], "zh-CN"));
+  const filtered = Object.values(query).some(Boolean);
+  const filterCount = [query.category, query.country, query.city].filter(Boolean).length;
+  const chips = (["year", "category", "country", "city"] as const).flatMap(key => {
+    const value = query[key];
+    if (!value) return [];
+    const label = key === "country" ? countries.find(([code]) => code === value)?.[1] || value : value === "undated" ? "日期未标注" : value;
+    return [{ key, label }];
+  });
+  const totalPhotos = entries.reduce((total, { collection }) => total + collection.photos.length, 0);
+  let imageIndex = 0;
+  return <main className={styles.page} data-timeline>
+    <header className={styles.header}>
+      <div className={styles.heading}><h1>时间线</h1><span className={styles.eyebrow}>TIMELINE</span></div>
+      <p className={styles.total}>{entries.length} 图集 · {totalPhotos} 张照片</p>
     </header>
-    <section className="public-page-container timeline-page-content">
-      <form aria-label="时间线筛选" className="public-filter-bar timeline-filter-bar" method="get">
-        <label><span>年份 / Year</span><select defaultValue={query.year || ""} name="year"><option value="">全部年份</option>{years.map((year) => <option key={year}>{year}</option>)}</select></label>
-        <label><span>分类 / Category</span><select defaultValue={query.category || ""} name="category"><option value="">全部分类</option>{archiveCategories.map((item) => <option key={item}>{item}</option>)}</select></label>
-        <label><span>国家 / Country</span><select defaultValue={query.country || ""} name="country"><option value="">全部国家</option>{countries.map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select></label>
-        <label><span>城市 / City</span><input defaultValue={query.city || ""} name="city" placeholder="城市名称" /></label>
-        <button className="public-filter-submit" type="submit"><Filter className="h-4 w-4" />应用筛选</button>
-        {filtered ? <Link aria-label="清除筛选" className="public-filter-clear" href="/timeline"><X className="h-4 w-4" /></Link> : null}
-      </form>
-      {items.length > 0 ? <div className="timeline-year-groups">{Array.from(groups.entries()).map(([year, yearItems], yearIndex) => <SectionReveal className="timeline-year-group" delay={Math.min(yearIndex, 3) * 0.05} key={year}><div className="timeline-year-heading"><span>{year}</span><p>{yearItems.length} Collections</p></div><div className="timeline-reel">{yearItems.map((item, index) => { const cover = collectionCover(item); return <article className="timeline-reel-item" key={item.id}>{cover ? <Link className="timeline-reel-photo" href={`/works/${item.slug}`}><Image alt={item.title} fill sizes="(max-width: 640px) 78vw, 24vw" src={mediaUrl(cover.id, "display")} /><span>{String(index + 1).padStart(2, "0")}</span></Link> : <div className="timeline-reel-photo timeline-reel-missing" />}<p>{collectionMonth(item)} / {item.category}</p><h2>{item.title}</h2><div><span>{collectionDateLabel(item)}</span>{item.location ? <span>{item.location.displayName}</span> : null}</div><Link aria-label={`打开 ${item.title}`} className="timeline-reel-open" href={`/works/${item.slug}`}><ArrowRight className="h-4 w-4" /></Link></article>; })}</div></SectionReveal>)}</div> : <div className="timeline-empty"><span>00 / Empty</span><h2>这段时间还没有公开图集</h2><Link href="/timeline">清除筛选</Link></div>}
-    </section>
+    <div className={styles.toolbar}>
+      <div className={styles.toolbarRow}>
+        <nav className={styles.years} aria-label="时间线年份">
+          <Link href={timelineHref({ ...query, year: undefined })} aria-current={!query.year ? "page" : undefined}>全部</Link>
+          {years.map(year => <Link key={year} href={timelineHref({ ...query, year })} aria-current={query.year === year ? "page" : undefined}>{year}</Link>)}
+          {all.some(entry => !entry.start) && <Link href={timelineHref({ ...query, year: "undated" })} aria-current={query.year === "undated" ? "page" : undefined}>未标注</Link>}
+        </nav>
+        <TimelineFilters className={styles.filters} countClassName={styles.filterCount} count={filterCount} key={timelineHref(query)}>
+          <form action="/timeline" aria-label="时间线筛选" className={styles.filterPanel} method="get">
+            {query.year && <input type="hidden" name="year" value={query.year} />}
+            <label>分类<Select defaultValue={query.category || ""} name="category"><option value="">全部分类</option>{archiveCategories.map(item => <option key={item}>{item}</option>)}</Select></label>
+            <label>国家<Select defaultValue={query.country || ""} name="country"><option value="">全部国家</option>{countries.map(([code, name]) => <option key={code} value={code}>{name}</option>)}</Select></label>
+            <label>城市<Input defaultValue={query.city || ""} name="city" placeholder="城市名称" /></label>
+            <div className={styles.filterActions}><Link href={timelineHref({ year: query.year })}>重置条件</Link><Button variant="primary" type="submit">应用筛选</Button></div>
+          </form>
+        </TimelineFilters>
+      </div>
+      {filtered && <div className={styles.activeFilters} aria-label="已选筛选">
+        {chips.map(({ key, label }) => <Link key={key} href={timelineHref({ ...query, [key]: undefined })} aria-label={`移除筛选：${label}`}>{label}<X size={12} aria-hidden="true" /></Link>)}
+        <Link href="/timeline">清除筛选</Link>
+      </div>}
+    </div>
+    {entries.length ? <div>{groups.map(({ year, months }) => <section className={styles.yearGroup} key={year} aria-labelledby={`timeline-year-${year}`} data-timeline-year={year}>
+      <div className={styles.yearRail}><div><h2 id={`timeline-year-${year}`} data-undated={year === "undated"}>{year === "undated" ? "日期未标注" : year}</h2><p>{months.reduce((sum, month) => sum + month.items.length, 0)} 个图集</p></div></div>
+      <div className={styles.months}>{months.map(({ month, items }) => <section className={styles.month} key={month} aria-label={month === "unknown" ? "未标注日期的图集" : `${year} 年 ${Number(month)} 月`}>
+        {month !== "unknown" && <div className={styles.monthHeading}><h3>{Number(month)} 月</h3><span>{String(items.length).padStart(2, "0")}</span></div>}
+        <div className={styles.grid}>{items.map(entry => {
+          const { collection } = entry;
+          const cover = collectionCover(collection);
+          const priority = Boolean(cover) && imageIndex++ < 3;
+          return <article key={collection.id} data-timeline-entry={collection.slug}><BeamCard className={styles.card}>
+            <Link className={styles.cardLink} href={`/works/${collection.slug}`} aria-label={`打开 ${collection.title}`}>
+              <div className={styles.cover}><TimelineCover src={cover ? mediaUrl(cover.id, "display") : null} priority={priority} /><span className={styles.photoCount}><Images size={12} aria-hidden="true" /><span aria-label={`${collection.photos.length} 张照片`}>{collection.photos.length}</span></span></div>
+              <div className={styles.caption}><h4>{collection.title}</h4><p title={entry.source === "photo" ? "来自照片拍摄时间" : undefined}>{entry.start ? <time dateTime={entry.start}>{timelineDateLabel(entry)}</time> : "日期未标注"}</p></div>
+            </Link>
+          </BeamCard></article>;
+        })}</div>
+      </section>)}</div>
+    </section>)}</div> : <section className={styles.empty}>
+      <Images size={28} strokeWidth={1.2} aria-hidden="true" /><h2>{filtered ? "没有符合条件的图集" : "还没有公开图集"}</h2>
+      {filtered ? <Link className="ui-button ui-button-secondary" href="/timeline">清除筛选</Link> : <Link className="ui-button ui-button-secondary" href="/archive">浏览图集</Link>}
+    </section>}
   </main>;
 }
