@@ -18,10 +18,6 @@
   isolation: isolate;
 }
 
-:global(body.map-unified-preview .site-scroll-progress) {
-  display: none;
-}
-
 .map {
   position: absolute;
   z-index: 0;

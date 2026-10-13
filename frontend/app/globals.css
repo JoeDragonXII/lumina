@@ -36,6 +36,11 @@ button, select { cursor: pointer; }
   border-radius: 4px;
 }
 
+/* The isolated map preview supplies its own progress chrome. */
+body.map-unified-preview .site-scroll-progress {
+  display: none;
+}
+
 /* Respect user motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,

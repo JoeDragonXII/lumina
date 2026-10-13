@@ -1,12 +1,12 @@
 {
     "name":  "lumina",
-    "version":  "0.2.0",
+    "version":  "0.2.1",
     "description":  "Lumina 鈥?local-first personal photography archive with galleries, timeline and maps.",
     "private":  true,
     "scripts":  {
                     "dev":  "next dev frontend -p 3002",
                     "dev:frontend":  "next dev frontend -p 3002",
-                    "build":  "next build frontend",
+                    "build":  "next build frontend --webpack",
                     "start":  "next start frontend -p 3002",
                     "lint":  "eslint",
                     "typecheck":  "pnpm typecheck:frontend \u0026\u0026 pnpm typecheck:backend",

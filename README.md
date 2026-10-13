@@ -1,6 +1,6 @@
 # Lumina
 
-Current release: **0.2.0**. See [Changelog](CHANGELOG.md) for the complete frontend, Studio, map, and performance updates.
+Current release: **0.2.1**. See [Changelog](CHANGELOG.md) for the complete frontend, Studio, map, and performance updates.
 
 [简体中文](README.zh-CN.md)
 

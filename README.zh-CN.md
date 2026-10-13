@@ -1,6 +1,6 @@
 # Lumina
 
-当前版本：**0.2.0**。本阶段首页、Studio、地图与性能更新见[更新记录](CHANGELOG.md)。
+当前版本：**0.2.1**。本阶段首页、Studio、地图与性能更新见[更新记录](CHANGELOG.md)。
 
 本地开发默认直接进入 Studio，可设置 `ADMIN_AUTH_REQUIRED=true` 启用登录。生产环境必须配置 `ADMIN_PASSWORD` 和 `AUTH_COOKIE_SECRET`，缺少配置时拒绝认证。
 

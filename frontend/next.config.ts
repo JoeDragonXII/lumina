@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   allowedDevOrigins: ["127.0.0.1"],
   outputFileTracingRoot: workspaceRoot,
-  serverExternalPackages: ["better-sqlite3", "exiftool-vendored", "sharp"],
+  // exifr loads Node's fs/zlib dynamically; let Node resolve them at runtime.
+  serverExternalPackages: ["better-sqlite3", "exiftool-vendored", "exifr", "sharp"],
   turbopack: {
     root: workspaceRoot,
   },
